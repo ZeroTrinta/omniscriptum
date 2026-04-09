@@ -57,7 +57,7 @@ body { font-family: 'Rajdhani', sans-serif; background: #020408; overflow: hidde
 .sr-type { font-size: 10px; color: #506880; margin-left: auto; }
 
 /* ===== FILTER BAR ===== */
-#filterbar { position: fixed; top: 56px; left: 12px; z-index: 90; display: flex; flex-direction: column; gap: 4px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+#filterbar { position: fixed; top: 88px; left: 12px; z-index: 90; display: flex; flex-direction: column; gap: 4px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 #filterbar.visible { opacity: 1; pointer-events: auto; }
 .filter-btn {
   background: rgba(10,15,30,0.85); border: 0.5px solid rgba(100,150,255,0.15);
@@ -97,7 +97,7 @@ body { font-family: 'Rajdhani', sans-serif; background: #020408; overflow: hidde
 
 /* ===== DETAIL PANEL ===== */
 #panel {
-  position: fixed; top: 48px; right: 0; bottom: 0; width: 380px;
+  position: fixed; top: 80px; right: 0; bottom: 0; width: 380px;
   background: linear-gradient(180deg, rgba(6,10,20,0.97) 0%, rgba(8,12,28,0.98) 100%);
   border-left: 0.5px solid rgba(100,150,255,0.15); display: flex;
   flex-direction: column; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
@@ -141,7 +141,7 @@ body { font-family: 'Rajdhani', sans-serif; background: #020408; overflow: hidde
 
 /* ===== EDITOR PANEL ===== */
 #editor-panel {
-  position: fixed; top: 48px; left: 0; bottom: 0; width: 340px;
+  position: fixed; top: 80px; left: 0; bottom: 0; width: 340px;
   background: linear-gradient(180deg, rgba(6,10,20,0.97) 0%, rgba(8,12,28,0.98) 100%);
   border-right: 0.5px solid rgba(100,150,255,0.15); display: flex;
   flex-direction: column; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
@@ -658,7 +658,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 
 /* ===== ADMIN PANEL ===== */
 #admin-panel {
-  position: fixed; top: 48px; left: 50%; transform: translateX(-50%) translateY(-110%);
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-110%);
   z-index: 500; background: rgba(6,10,22,.98);
   border: 0.5px solid rgba(100,150,255,.2); border-radius: 14px;
   padding: 1.4rem; width: 480px; max-width: 96vw;
@@ -820,22 +820,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 
 
 /* ===== TIME DISPLAY ===== */
-#game-date-display {
-  position: fixed; bottom: 14px; right: 16px; z-index: 80;
-  display: none; flex-direction: column; align-items: flex-end;
-  background: rgba(5,8,20,0.85); border: 0.5px solid rgba(100,150,255,0.12);
-  border-radius: 10px; padding: 6px 12px; backdrop-filter: blur(8px);
-  user-select: none;
-}
-#game-date-display.visible { display: flex; }
-#game-date-year {
-  font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700;
-  color: #80b0e0; letter-spacing: .1em;
-}
-#game-date-day {
-  font-size: 10px; color: #3a5880; letter-spacing: .06em;
-  font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
-}
+/* game-date-display moved to statusbar */
 
 /* ===== TIME PROGRESS IN ADMIN ===== */
 .admin-time-block { margin-top: .8rem; }
@@ -968,6 +953,77 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 }
 .admin-edit-btn:hover { background: rgba(40,70,180,.5); color: #c0d8ff; }
 
+
+/* ===== STATUS BAR ===== */
+#statusbar {
+  position: fixed; top: 48px; left: 0; right: 0; height: 32px; z-index: 95;
+  background: rgba(4,7,18,0.97); border-bottom: 0.5px solid rgba(100,150,255,0.1);
+  display: flex; align-items: center; padding: 0 12px; gap: 0;
+  backdrop-filter: blur(8px); user-select: none; overflow: hidden;
+}
+
+/* Bloco de data + progresso */
+#sb-date-block {
+  display: flex; align-items: center; gap: 10px;
+  padding-right: 12px; border-right: 0.5px solid rgba(100,150,255,0.1);
+  flex-shrink: 0; min-width: 180px;
+}
+#sb-date-text {
+  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 600;
+  color: #6090c0; letter-spacing: .06em; white-space: nowrap;
+}
+#sb-month-day { font-size: 10px; color: #2a4060; white-space: nowrap; font-family: 'Rajdhani', sans-serif; }
+#sb-progress-wrap { flex: 1; max-width: 80px; }
+#sb-progress-track {
+  height: 4px; background: rgba(30,50,100,.4); border-radius: 2px; overflow: hidden;
+}
+#sb-progress-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, #2a5abf, #4080e0);
+  transition: width .5s linear;
+}
+#sb-progress-fill.paused { background: linear-gradient(90deg, #7a5010, #c09030); }
+
+/* Divisor geral */
+.sb-sep { width: 0.5px; background: rgba(100,150,255,0.1); align-self: stretch; margin: 0 10px; flex-shrink: 0; }
+
+/* Bloco de créditos do jogador atual */
+#sb-player-block {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; border-right: 0.5px solid rgba(100,150,255,0.1);
+  flex-shrink: 0;
+}
+#sb-player-credits-label { font-size: 9px; color: #2a4060; text-transform: uppercase; letter-spacing: .06em; font-family: 'Rajdhani', sans-serif; }
+#sb-player-credits-value { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #5acc80; }
+
+/* Bloco de lista de jogadores (mestre) */
+#sb-players-block {
+  display: flex; align-items: center; gap: 0; overflow: hidden; flex: 1;
+}
+.sb-player-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 10px; height: 32px; border-right: 0.5px solid rgba(100,150,255,0.07);
+  flex-shrink: 0;
+}
+.sb-player-chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sb-player-chip-name { font-size: 11px; color: #6080a0; font-family: 'Rajdhani', sans-serif; font-weight: 600; white-space: nowrap; }
+.sb-player-chip-credits { font-size: 10px; color: #3acc60; font-family: 'Orbitron', sans-serif; white-space: nowrap; }
+.sb-online-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+/* Bloco de planetas produzindo (jogador) */
+#sb-planets-block {
+  display: flex; align-items: center; gap: 0; overflow: hidden; flex: 1;
+  padding-left: 6px;
+}
+.sb-planet-chip {
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 8px; height: 32px; border-right: 0.5px solid rgba(100,150,255,0.07);
+  flex-shrink: 0;
+}
+.sb-planet-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sb-planet-name { font-size: 10px; color: #5070a0; font-family: 'Rajdhani', sans-serif; white-space: nowrap; }
+.sb-planet-income { font-size: 10px; color: #3a9a50; font-family: 'Orbitron', sans-serif; white-space: nowrap; }
+
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -1024,15 +1080,35 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
   <button id="btn-logout" style="display:none" title="Sair">✕</button>
 </div>
 
+<div id="statusbar">
+  <!-- Data + progresso -->
+  <div id="sb-date-block">
+    <div>
+      <div id="sb-date-text">ANO 3036</div>
+      <div id="sb-month-day">1 de Janeiro</div>
+    </div>
+    <div id="sb-progress-wrap">
+      <div id="sb-progress-track">
+        <div id="sb-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Créditos do jogador -->
+  <div id="sb-player-block">
+    <div>
+      <div id="sb-player-credits-label">Seus créditos</div>
+      <div id="sb-player-credits-value">— ₢</div>
+    </div>
+  </div>
+  <!-- Lista jogadores (mestre) OU planetas produzindo (jogador) -->
+  <div id="sb-players-block" style="display:none"></div>
+  <div id="sb-planets-block" style="display:none"></div>
+</div>
+
 <div id="filterbar"></div>
 
 <div id="canvas-wrap">
   <canvas id="galaxy"></canvas>
-</div>
-
-<div id="game-date-display">
-  <div id="game-date-year">ANO 3036</div>
-  <div id="game-date-day">Dia 1 de Janeiro</div>
 </div>
 
 <div id="hint"><span class="hint-desktop">Shift + Arraste = mover com imã · Alt + Arraste = mover livre · Scroll para zoom · Clique para detalhes</span><span class="hint-mobile">Toque para detalhes · Segure para arrastar · Pinça para zoom</span></div>
@@ -1057,7 +1133,7 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
   <div id="planet-desc"></div>
   <div id="stats-grid">
     <div class="stat-card"><div class="stat-label">População</div><div class="stat-value" id="s-pop">—</div></div>
-    <div class="stat-card"><div class="stat-label">Sistema</div><div class="stat-value" id="s-sys">—</div></div>
+    <div class="stat-card"><div class="stat-label">Dono</div><div class="stat-value" id="s-sys" style="font-size:12px">—</div></div>
     <div class="stat-card"><div class="stat-label">Clima</div><div class="stat-value" id="s-clim">—</div></div>
     <div class="stat-card"><div class="stat-label">Governo</div><div class="stat-value" id="s-gov" style="display:flex;align-items:center;gap:6px"><span id="s-gov-text">—</span><button id="gov-info-btn" style="display:none;background:none;border:0.5px solid rgba(100,150,255,0.3);border-radius:50%;width:16px;height:16px;font-size:10px;color:#6080c0;cursor:pointer;flex-shrink:0;line-height:1;padding:0">ⓘ</button></div></div>
   </div>
@@ -1403,7 +1479,7 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
         <div class="op-title">Dados do Sistema</div>
         <div class="op-stats">
           <div class="op-stat"><div class="op-stat-label">População</div><div class="op-stat-value" id="op-pop">—</div></div>
-          <div class="op-stat"><div class="op-stat-label">Sistema</div><div class="op-stat-value" id="op-sys">—</div></div>
+          <div class="op-stat"><div class="op-stat-label">Dono</div><div class="op-stat-value" id="op-sys" style="font-size:12px">—</div></div>
         </div>
       </div>
       <div class="op-section" id="op-faction-section">
@@ -1412,15 +1488,19 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
       </div>
       <div class="op-section">
         <div class="op-title">Economia</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <div class="op-economy-credit" style="flex-direction:column;gap:2px">
-            <div class="op-econ-label">Saldo atual</div>
-            <div class="op-econ-value" id="op-balance" style="font-size:16px">— ₢</div>
+            <div class="op-econ-label">Renda acumulada</div>
+            <div class="op-econ-value" id="op-balance" style="font-size:15px">— ₢</div>
           </div>
           <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(100,200,150,.15)">
             <div class="op-econ-label">Geração / mês</div>
-            <div class="op-econ-value" id="op-credits" style="font-size:16px;color:#80c0a0">— ₢</div>
+            <div class="op-econ-value" id="op-credits" style="font-size:15px;color:#80c0a0">— ₢</div>
           </div>
+        </div>
+        <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(100,180,255,.15)">
+          <div class="op-econ-label">Seus créditos (para construir)</div>
+          <div class="op-econ-value" id="op-player-balance" style="font-size:15px;color:#80b8ff">— ₢</div>
         </div>
       </div>
       <div class="op-section op-buildings-section">
@@ -2736,7 +2816,7 @@ function showPanel(p) {
     starsEl.style.display = 'none';
   }
   document.getElementById('s-pop').textContent = p.pop || '—';
-  document.getElementById('s-sys').textContent = p.system || '—';
+  document.getElementById('s-sys').textContent = p.ownerName || 'Sem dono';
   document.getElementById('s-clim').textContent = p.climate || '—';
   const govVal = p.gov || '—';
   document.getElementById('s-gov-text').textContent = govVal;
@@ -3397,6 +3477,15 @@ function initPlanetBuildings(planet) {
   }
 }
 
+function updateOrbitEconUI(planet) {
+  const credEl = document.getElementById('op-credits');
+  if (credEl) credEl.textContent = calcMonthlyCredits(planet).toLocaleString() + ' ₢';
+  const balEl = document.getElementById('op-balance');
+  if (balEl) balEl.textContent = (planet.credits || 0).toLocaleString() + ' ₢';
+  const pBalEl = document.getElementById('op-player-balance');
+  if (pBalEl) pBalEl.textContent = currentPlayer ? (currentPlayer.credits || 0).toLocaleString() + ' ₢' : '— ₢';
+}
+
 function calcMonthlyCredits(planet) {
   if (!planet.buildings || planet.buildings.length === 0) return 0;
   return planet.buildings.reduce((sum, b) => {
@@ -3435,13 +3524,21 @@ function formatGameDate() {
 
 function updateDateUI() {
   const { year, day } = formatGameDate();
-  const yearEl = document.getElementById('game-date-year');
-  const dayEl  = document.getElementById('game-date-day');
-  if (yearEl) yearEl.textContent = year;
-  if (dayEl)  dayEl.textContent  = day;
+
+  // Statusbar
+  const sbYear = document.getElementById('sb-date-text');
+  const sbDay  = document.getElementById('sb-month-day');
+  if (sbYear) sbYear.textContent = year;
+  if (sbDay)  sbDay.textContent  = `${timeState.day} de ${MONTHS_PT[timeState.month]}`;
+
+  const pct = ((timeState.day - 1) / DAYS_PER_MONTH) * 100;
+  const sbFill = document.getElementById('sb-progress-fill');
+  if (sbFill) {
+    sbFill.style.width = pct + '%';
+    sbFill.classList.toggle('paused', timeState.paused);
+  }
 
   // Barra de progresso no admin
-  const pct = ((timeState.day - 1) / DAYS_PER_MONTH) * 100;
   const fill = document.getElementById('admin-progress-fill');
   const val  = document.getElementById('admin-time-value');
   const lbl  = document.getElementById('admin-time-label');
@@ -3453,6 +3550,46 @@ function updateDateUI() {
   if (lbl) {
     lbl.textContent = timeState.paused ? '⏸ Tempo pausado' : 'Progresso do mês';
     lbl.classList.toggle('admin-time-paused', timeState.paused);
+  }
+}
+
+function updateStatusBar() {
+  // Créditos do jogador atual
+  const credVal = document.getElementById('sb-player-credits-value');
+  if (credVal && currentPlayer) credVal.textContent = (currentPlayer.credits || 0).toLocaleString() + ' ₢';
+
+  if (isMaster()) {
+    // Mestre: lista de jogadores com créditos e status online
+    document.getElementById('sb-players-block').style.display = 'flex';
+    document.getElementById('sb-planets-block').style.display = 'none';
+    const block = document.getElementById('sb-players-block');
+    block.innerHTML = allPlayers.map(pl => {
+      const online = onlinePlayers.has(pl.uid);
+      return `<div class="sb-player-chip">
+        <div class="sb-player-chip-dot" style="background:${pl.color || '#4a90d9'}"></div>
+        <div class="sb-online-dot" style="background:${online ? '#3de87a' : '#334455'}"></div>
+        <span class="sb-player-chip-name">${pl.name || pl.email.split('@')[0]}</span>
+        <span class="sb-player-chip-credits">${(pl.credits||0).toLocaleString()} ₢</span>
+      </div>`;
+    }).join('');
+  } else if (currentPlayer) {
+    // Jogador: planetas que controla e quanto cada um produz
+    document.getElementById('sb-players-block').style.display = 'none';
+    document.getElementById('sb-planets-block').style.display = 'flex';
+    const block = document.getElementById('sb-planets-block');
+    const myPlanets = PLANETS.filter(p => p.ownerId === currentPlayer.uid);
+    if (myPlanets.length === 0) {
+      block.innerHTML = '<span style="font-size:10px;color:#2a4060;padding:0 12px;font-family:Rajdhani,sans-serif">Nenhum planeta sob controle</span>';
+    } else {
+      block.innerHTML = myPlanets.map(p => {
+        const income = calcMonthlyCredits(p);
+        return `<div class="sb-planet-chip">
+          <div class="sb-planet-dot" style="background:${p.color}"></div>
+          <span class="sb-planet-name">${p.name}</span>
+          <span class="sb-planet-income">+${income.toLocaleString()} ₢</span>
+        </div>`;
+      }).join('');
+    }
   }
 }
 
@@ -3941,11 +4078,7 @@ function renderBuildingsList(planet) {
           b.level = 1;
           // recalcular créditos e salvar
           initPlanetBuildings(planet);
-          const monthly = calcMonthlyCredits(planet);
-          const credEl = document.getElementById('op-credits');
-          if (credEl) credEl.textContent = monthly.toLocaleString() + ' ₢';
-          const balEl = document.getElementById('op-balance');
-          if (balEl) balEl.textContent = (planet.credits || 0).toLocaleString() + ' ₢';
+          updateOrbitEconUI(planet);
           renderBuildingsList(planet);
           if (window._fb && currentUser) savePlanet(planet);
           return;
@@ -4113,7 +4246,7 @@ function openOrbitScreen(planet) {
 
   document.getElementById('op-desc').textContent = planet.desc || 'Dados de campo pendentes.';
   document.getElementById('op-pop').textContent = planet.pop || '—';
-  document.getElementById('op-sys').textContent = planet.system || '—';
+  document.getElementById('op-sys').textContent = planet.ownerName || 'Sem dono';
 
   // Facções
   const fEl = document.getElementById('op-factions');
@@ -4179,9 +4312,7 @@ function openOrbitScreen(planet) {
 
   // Construções e créditos
   initPlanetBuildings(planet);
-  const monthly = calcMonthlyCredits(planet);
-  document.getElementById('op-credits').textContent = monthly.toLocaleString() + ' ₢';
-  document.getElementById('op-balance').textContent = (planet.credits || 0).toLocaleString() + ' ₢';
+  updateOrbitEconUI(planet);
 
   // Owner badge na topbar de órbita
   const ownerBadge = document.getElementById('orbit-owner-badge');
@@ -4708,6 +4839,20 @@ async function loadCurrentPlayer(uid) {
     await setDoc(pRef, currentPlayer);
   }
   updateUserBadge();
+  // Escutar mudanças no próprio jogador em tempo real (créditos, etc.)
+  const { onSnapshot } = window._fb;
+  onSnapshot(pRef, snap2 => {
+    if (snap2.exists()) {
+      const updated = snap2.data();
+      if (currentPlayer) currentPlayer.credits = updated.credits || 0;
+      // Atualizar UI de órbita se aberta
+      const pBalEl = document.getElementById('op-player-balance');
+      if (pBalEl) pBalEl.textContent = (currentPlayer.credits || 0).toLocaleString() + ' ₢';
+      const sbCred = document.getElementById('sb-player-credits-value');
+      if (sbCred) sbCred.textContent = (currentPlayer.credits || 0).toLocaleString() + ' ₢';
+      updateStatusBar();
+    }
+  });
 }
 
 /* ── Presença online via Realtime Database ── */
@@ -4883,6 +5028,7 @@ async function advanceTick() {
   if (orbitPlanet) {
     document.getElementById('op-balance').textContent = (orbitPlanet.credits || 0).toLocaleString() + ' ₢';
   }
+  updateStatusBar();
   showSaved();
   loadAdminStats();
   alert(`Mês avançado! +${totalNew.toLocaleString()} ₢ distribuídos.`);
@@ -4893,11 +5039,18 @@ async function buyBuilding(planet, type) {
   const cost = BUILD_COSTS[type] || 5000;
   const ownsIt = isMaster() || (currentPlayer && planet.ownerId === currentPlayer.uid);
   if (!ownsIt) { alert('Você não controla este planeta.'); return; }
-  if ((planet.credits || 0) < cost) {
-    alert(`Créditos insuficientes! Necessário: ${cost.toLocaleString()} ₢ — Disponível: ${(planet.credits||0).toLocaleString()} ₢`);
+  // Créditos do JOGADOR (não do planeta)
+  const playerCreds = currentPlayer ? (currentPlayer.credits || 0) : 0;
+  if (!isMaster() && playerCreds < cost) {
+    alert(`Créditos insuficientes!\nNecessário: ${cost.toLocaleString()} ₢\nSeus créditos: ${playerCreds.toLocaleString()} ₢`);
     return;
   }
-  planet.credits -= cost;
+  // Debitar do jogador
+  if (!isMaster() && currentPlayer) {
+    currentPlayer.credits -= cost;
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'players', currentPlayer.uid), { credits: currentPlayer.credits });
+  }
   const now = Date.now();
   planet.buildings = planet.buildings || [];
   planet.buildings.push({
@@ -4908,10 +5061,7 @@ async function buyBuilding(planet, type) {
   });
   await savePlanet(planet);
   renderBuildingsList(planet);
-  const credEl = document.getElementById('op-credits');
-  if (credEl) credEl.textContent = calcMonthlyCredits(planet).toLocaleString() + ' ₢';
-  const balEl = document.getElementById('op-balance');
-  if (balEl) balEl.textContent = (planet.credits || 0).toLocaleString() + ' ₢';
+  updateOrbitEconUI(planet);
 }
 
 /* ── Upgrade de construção ── */
@@ -4922,14 +5072,20 @@ async function upgradeBuilding(planet, idx) {
   if (!ownsIt) { alert('Você não controla este planeta.'); return; }
   if (b.level >= 5) { alert('Nível máximo atingido!'); return; }
   const cost = upgradeCost(b.type, b.level);
-  if ((planet.credits || 0) < cost) {
-    alert(`Créditos insuficientes! Necessário: ${cost.toLocaleString()} ₢`);
+  const playerCreds2 = currentPlayer ? (currentPlayer.credits || 0) : 0;
+  if (!isMaster() && playerCreds2 < cost) {
+    alert(`Créditos insuficientes!\nNecessário: ${cost.toLocaleString()} ₢\nSeus créditos: ${playerCreds2.toLocaleString()} ₢`);
     return;
   }
-  planet.credits -= cost;
+  if (!isMaster() && currentPlayer) {
+    currentPlayer.credits -= cost;
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'players', currentPlayer.uid), { credits: currentPlayer.credits });
+  }
   b.level++;
   await savePlanet(planet);
   renderBuildingsList(planet);
+  updateOrbitEconUI(planet);
 }
 
 /* ── Estatísticas do admin ── */
@@ -4972,6 +5128,7 @@ async function loadAdminStats() {
       </div>`).join('')
     : '<div style="font-size:12px;color:#3a5060;padding:.5rem 0">Nenhum jogador ainda.</div>';
   updateOwnerLegend();
+  updateStatusBar();
 }
 
 /* ── Auth flow ── */
