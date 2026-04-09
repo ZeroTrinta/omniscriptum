@@ -97,7 +97,7 @@ body { font-family: 'Rajdhani', sans-serif; background: #020408; overflow: hidde
 
 /* ===== DETAIL PANEL ===== */
 #panel {
-  position: fixed; top: 48px; right: 0; bottom: 0; width: 300px;
+  position: fixed; top: 48px; right: 0; bottom: 0; width: 380px;
   background: linear-gradient(180deg, rgba(6,10,20,0.97) 0%, rgba(8,12,28,0.98) 100%);
   border-left: 0.5px solid rgba(100,150,255,0.15); display: flex;
   flex-direction: column; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
@@ -809,11 +809,20 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
   cursor: pointer; font-family: 'Rajdhani', sans-serif; transition: all .15s;
 }
 .admin-assign-btn:hover { background: rgba(40,70,180,0.5); color: #a0c0e0; }
+.admin-remove-btn {
+  background: rgba(80,15,15,0.5); border: 0.5px solid rgba(200,60,60,0.25);
+  border-radius: 50%; width: 22px; height: 22px; font-size: 11px; color: #c06060;
+  cursor: pointer; font-family: 'Rajdhani', sans-serif; transition: all .15s;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.admin-remove-btn:hover { background: rgba(120,20,20,0.6); color: #e08080; }
+.admin-player-email { font-size: 10px; color: #2a4060; font-family: monospace; }
 
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getDatabase, ref, onValue, set, onDisconnect, serverTimestamp as rtdbTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const FB_CONFIG = window.FB_CONFIG = {
@@ -822,16 +831,19 @@ const FB_CONFIG = window.FB_CONFIG = {
   projectId: "omniscriptum-7b174",
   storageBucket: "omniscriptum-7b174.firebasestorage.app",
   messagingSenderId: "221968940561",
-  appId: "1:221968940561:web:10842858478f223b7dfbb0"
+  appId: "1:221968940561:web:10842858478f223b7dfbb0",
+  databaseURL: "https://omniscriptum-7b174-default-rtdb.firebaseio.com"
 };
 
 const fbApp  = initializeApp(FB_CONFIG);
 const db     = getFirestore(fbApp);
+const rtdb   = getDatabase(fbApp);
 const auth   = getAuth(fbApp);
 
 // ── Expor globalmente para o script legado ──
-window._fb = { db, auth, doc, getDoc, setDoc, updateDoc, onSnapshot,
+window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot,
                collection, getDocs, serverTimestamp,
+               ref, onValue, set, onDisconnect, rtdbTimestamp,
                signInWithEmailAndPassword, signOut, onAuthStateChanged };
 </script>
 
@@ -1105,7 +1117,7 @@ window._fb = { db, auth, doc, getDoc, setDoc, updateDoc, onSnapshot,
   <div id="admin-add-player-form" style="display:none;margin-top:.8rem;background:rgba(15,25,65,.5);border:0.5px solid rgba(100,150,255,.12);border-radius:8px;padding:.8rem">
     <div style="font-size:9px;color:#344870;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Novo Jogador</div>
     <input class="login-input" id="new-player-name" placeholder="Nome do jogador" style="margin-bottom:6px;font-size:12px;padding:7px 12px">
-    <input class="login-input" id="new-player-email" placeholder="E-mail" style="margin-bottom:6px;font-size:12px;padding:7px 12px">
+    <input class="login-input" id="new-player-email" placeholder="Ex: leonardo@omni.rpg" style="margin-bottom:6px;font-size:12px;padding:7px 12px">
     <input class="login-input" id="new-player-pass" placeholder="Senha" type="password" style="margin-bottom:8px;font-size:12px;padding:7px 12px">
     <div style="display:flex;gap:6px">
       <button class="admin-btn admin-btn-green" id="admin-create-player-btn" style="font-size:11px;padding:7px">Criar Jogador</button>
@@ -3256,6 +3268,43 @@ async function createPlayer(name, email, password) {
   showSaved();
 }
 
+/* ── Remover jogador ── */
+async function removePlayer(uid, name) {
+  if (!confirm(`Remover jogador "${name}"? Os planetas atribuídos a ele ficarão sem dono.`)) return;
+  const { db, doc, collection, getDocs, updateDoc } = window._fb;
+  const API_KEY = window.FB_CONFIG.apiKey;
+
+  // 1. Remover ownership dos planetas desse jogador
+  const planetsOwned = PLANETS.filter(p => p.ownerId === uid);
+  for (const p of planetsOwned) {
+    p.ownerId = null; p.ownerName = null;
+    await updateDoc(doc(db, 'planets', String(p.id)), { ownerId: null, ownerName: null });
+  }
+
+  // 2. Deletar documento do Firestore
+  const { deleteDoc } = window._fb;
+  await deleteDoc(doc(db, 'players', uid));
+
+  // 3. Deletar do Auth via REST (requer o token do mestre logado)
+  try {
+    const token = await window._fb.auth.currentUser.getIdToken();
+    await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${API_KEY}`,
+      { method: 'POST', headers: {'Content-Type':'application/json', 'Authorization': 'Bearer ' + token},
+        body: JSON.stringify({ localId: uid }) }
+    );
+  } catch(e) {
+    console.warn('Não foi possível deletar do Auth (sem permissão admin):', e.message);
+  }
+
+  // 4. Atualizar local
+  allPlayers = allPlayers.filter(p => p.uid !== uid);
+  delete playerColorMap[uid];
+  loadAdminStats();
+  updateOwnerLegend();
+  showSaved();
+}
+
 /* ── Atualizar legenda de donos no mapa ── */
 function updateOwnerLegend() {
   const legend = document.getElementById('owner-legend');
@@ -4160,6 +4209,33 @@ async function loadCurrentPlayer(uid) {
   updateUserBadge();
 }
 
+/* ── Presença online via Realtime Database ── */
+let onlinePlayers = new Set(); // UIDs online
+
+function initPresence(uid) {
+  const { rtdb, ref, set, onDisconnect, rtdbTimestamp, onValue } = window._fb;
+  const presRef = ref(rtdb, `presence/${uid}`);
+
+  // Marcar como online
+  set(presRef, { online: true, uid, lastSeen: Date.now() });
+
+  // Quando desconectar, marcar como offline automaticamente
+  onDisconnect(presRef).set({ online: false, uid, lastSeen: Date.now() });
+
+  // Escutar todos os presentes
+  const allPresRef = ref(rtdb, 'presence');
+  onValue(allPresRef, snap => {
+    onlinePlayers.clear();
+    snap.forEach(child => {
+      const d = child.val();
+      if (d && d.online) onlinePlayers.add(d.uid);
+    });
+    // Re-renderizar lista de jogadores se o admin estiver aberto
+    const panel = document.getElementById('admin-panel');
+    if (panel && panel.classList.contains('open')) loadAdminStats();
+  });
+}
+
 /* ── Atualizar badge no topbar ── */
 function updateUserBadge() {
   if (!currentPlayer) return;
@@ -4361,17 +4437,24 @@ async function loadAdminStats() {
     allPlayers.push({ ...pl, color: playerColorMap[pl.uid] });
     const planetCount = PLANETS.filter(p => p.ownerId === pl.uid).length;
     total += pl.credits || 0;
-    rows.push({ name: pl.name || pl.email, credits: pl.credits || 0, planets: planetCount, color: playerColorMap[pl.uid] || '#888' });
+    rows.push({ uid: pl.uid, email: pl.email, name: pl.name || pl.email.split('@')[0], credits: pl.credits || 0, planets: planetCount, color: playerColorMap[pl.uid] || '#888', online: onlinePlayers.has(pl.uid) });
   });
   document.getElementById('admin-total-credits').textContent = total.toLocaleString() + ' ₢';
   document.getElementById('admin-player-count').textContent = rows.length;
   document.getElementById('admin-players-list').innerHTML = rows.length
     ? rows.map(r =>
-      `<div class="admin-player-row">
-        <div class="player-select-dot" style="background:${r.color};width:8px;height:8px;border-radius:50%;flex-shrink:0"></div>
-        <span class="admin-player-name">${r.name}</span>
-        <span class="admin-player-planets">${r.planets} planetas</span>
-        <span class="admin-player-credits">${r.credits.toLocaleString()} ₢</span>
+      `<div class="admin-player-row" style="flex-direction:column;align-items:flex-start;gap:4px;padding:8px 0">
+        <div style="display:flex;align-items:center;gap:8px;width:100%">
+          <div style="position:relative;width:10px;height:10px;flex-shrink:0">
+            <div style="width:10px;height:10px;border-radius:50%;background:${r.color}"></div>
+            <div style="position:absolute;bottom:-1px;right:-1px;width:6px;height:6px;border-radius:50%;background:${r.online ? '#3de87a' : '#334455'};border:1.5px solid rgba(6,10,24,.99)"></div>
+          </div>
+          <span class="admin-player-name" style="flex:1">${r.name}</span>
+          <span class="admin-player-planets">${r.planets} planetas</span>
+          <span class="admin-player-credits">${r.credits.toLocaleString()} ₢</span>
+          <button class="admin-remove-btn" onclick="removePlayer('${r.uid}','${r.name}')" title="Remover jogador">✕</button>
+        </div>
+        <div class="admin-player-email" style="padding-left:16px">${r.email}</div>
       </div>`).join('')
     : '<div style="font-size:12px;color:#3a5060;padding:.5rem 0">Nenhum jogador ainda.</div>';
   updateOwnerLegend();
