@@ -5368,11 +5368,15 @@ async function runLoadingSequence(tasks) {
   for (let i = 0; i < LOADING_STEPS.length && i < tasks.length; i++) {
     const [pct, label] = LOADING_STEPS[i];
     setLoadingProgress(pct, label);
-    await tasks[i]();
-    await new Promise(r => setTimeout(r, 180));
+    // Timeout máximo de 5s por step — nunca trava
+    await Promise.race([
+      tasks[i](),
+      new Promise(r => setTimeout(r, 5000)),
+    ]).catch(() => {});
+    await new Promise(r => setTimeout(r, 150));
   }
   setLoadingProgress(100, 'Sistema pronto.');
-  await new Promise(r => setTimeout(r, 400));
+  await new Promise(r => setTimeout(r, 350));
 }
 
 async function openSessionScreen() {
@@ -5401,7 +5405,7 @@ async function openSessionScreen() {
   if (isMaster()) {
     document.getElementById('session-master-card').style.display = 'block';
     document.getElementById('session-player-card').style.display = 'none';
-    await loadSaveList();
+    loadSaveList(); // não bloqueia o fluxo
   } else {
     document.getElementById('session-master-card').style.display = 'none';
     document.getElementById('session-player-card').style.display = 'block';
@@ -5422,25 +5426,34 @@ function closeSessionScreen() {
 }
 
 async function loadSaveList() {
-  const { db, collection, getDocs } = window._fb;
-  const snap = await getDocs(collection(db, 'sessions'));
   const list = document.getElementById('session-save-list');
-  if (snap.empty) { list.innerHTML = ''; return; }
-  const saves = [];
-  snap.forEach(d => saves.push({ id: d.id, ...d.data() }));
-  saves.sort((a,b) => (b.savedAt||0) - (a.savedAt||0));
-  list.innerHTML = saves.map(s => {
-    const date = s.savedAt ? new Date(s.savedAt).toLocaleString('pt-BR') : '—';
-    return `<div class="session-save-item" data-id="${s.id}">
-      <span class="session-save-icon">◈</span>
-      <span class="session-save-name">${s.name || s.id}</span>
-      <span class="session-save-date">${date}</span>
-      <button class="session-save-delete" onclick="deleteSession('${s.id}',event)" title="Apagar">✕</button>
-    </div>`;
-  }).join('');
-  list.querySelectorAll('.session-save-item').forEach(item => {
-    item.addEventListener('click', () => loadSession(item.dataset.id));
-  });
+  list.innerHTML = '<div style="font-size:11px;color:#2a4060;padding:4px 0">Carregando saves...</div>';
+  try {
+    const { db, collection, getDocs } = window._fb;
+    const snap = await getDocs(collection(db, 'sessions'));
+    if (snap.empty) {
+      list.innerHTML = '<div style="font-size:11px;color:#2a4060;padding:4px 0">Nenhum save encontrado. Crie uma nova sessão!</div>';
+      return;
+    }
+    const saves = [];
+    snap.forEach(d => saves.push({ id: d.id, ...d.data() }));
+    saves.sort((a,b) => (b.savedAt||0) - (a.savedAt||0));
+    list.innerHTML = saves.map(s => {
+      const date = s.savedAt ? new Date(s.savedAt).toLocaleString('pt-BR') : '—';
+      return `<div class="session-save-item" data-id="${s.id}">
+        <span class="session-save-icon">◈</span>
+        <span class="session-save-name">${s.name || s.id}</span>
+        <span class="session-save-date">${date}</span>
+        <button class="session-save-delete" onclick="deleteSession('${s.id}',event)" title="Apagar">✕</button>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.session-save-item').forEach(item => {
+      item.addEventListener('click', () => loadSession(item.dataset.id));
+    });
+  } catch(e) {
+    console.warn('loadSaveList error:', e.message);
+    list.innerHTML = '<div style="font-size:11px;color:#2a4060;padding:4px 0">Nenhum save ainda. Crie uma nova sessão!</div>';
+  }
 }
 
 async function createNewSession(name) {
