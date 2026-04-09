@@ -1165,6 +1165,13 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
     <button id="orbit-back">&#8592; Mapa Galáctico</button>
     <div id="orbit-planet-title">—</div>
     <div id="orbit-planet-type-badge">—</div>
+    <div id="orbit-owner-badge" style="display:none;align-items:center;gap:6px;
+      background:rgba(20,35,80,.4);border:0.5px solid rgba(100,150,255,.15);
+      border-radius:20px;padding:3px 12px;font-size:11px;margin-left:auto;flex-shrink:0">
+      <div id="orbit-owner-dot" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div>
+      <span id="orbit-owner-name" style="color:#a0c0e0;font-family:'Rajdhani',sans-serif;font-weight:600"></span>
+      <span style="color:#3a5070;font-size:10px;font-family:'Rajdhani',sans-serif">Controla este planeta</span>
+    </div>
   </div>
   <div id="orbit-body">
     <div id="orbit-view">
@@ -1198,13 +1205,14 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
       </div>
       <div class="op-section">
         <div class="op-title">Economia</div>
-        <div class="op-economy-header">
-          <div class="op-economy-credit">
-            <span class="op-econ-icon">◈</span>
-            <div>
-              <div class="op-econ-label">Créditos / mês</div>
-              <div class="op-econ-value" id="op-credits">—</div>
-            </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="op-economy-credit" style="flex-direction:column;gap:2px">
+            <div class="op-econ-label">Saldo atual</div>
+            <div class="op-econ-value" id="op-balance" style="font-size:16px">— ₢</div>
+          </div>
+          <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(100,200,150,.15)">
+            <div class="op-econ-label">Geração / mês</div>
+            <div class="op-econ-value" id="op-credits" style="font-size:16px;color:#80c0a0">— ₢</div>
           </div>
         </div>
       </div>
@@ -3187,8 +3195,9 @@ function initPlanetBuildings(planet) {
 function calcMonthlyCredits(planet) {
   if (!planet.buildings || planet.buildings.length === 0) return 0;
   return planet.buildings.reduce((sum, b) => {
-    const bt = BUILDING_TYPES[b.type];
-    return sum + (bt ? bt.credits * b.level : 0);
+    if (b.constructing) return sum; // em construção não gera ainda
+    const tbl = CREDITS_PER_TICK[b.type];
+    return sum + (tbl ? (tbl[Math.min(b.level || 1, 5)] || 0) : 0);
   }, 0);
 }
 
@@ -3462,7 +3471,9 @@ function renderBuildingsList(planet) {
           initPlanetBuildings(planet);
           const monthly = calcMonthlyCredits(planet);
           const credEl = document.getElementById('op-credits');
-          if (credEl) credEl.textContent = monthly > 0 ? monthly.toLocaleString() + ' ₢' : '0 ₢';
+          if (credEl) credEl.textContent = monthly.toLocaleString() + ' ₢';
+          const balEl = document.getElementById('op-balance');
+          if (balEl) balEl.textContent = (planet.credits || 0).toLocaleString() + ' ₢';
           renderBuildingsList(planet);
           if (window._fb && currentUser) savePlanet(planet);
           return;
@@ -3697,9 +3708,20 @@ function openOrbitScreen(planet) {
   // Construções e créditos
   initPlanetBuildings(planet);
   const monthly = calcMonthlyCredits(planet);
-  document.getElementById('op-credits').textContent = monthly > 0
-    ? monthly.toLocaleString() + ' ₢'
-    : '0 ₢';
+  document.getElementById('op-credits').textContent = monthly.toLocaleString() + ' ₢';
+  document.getElementById('op-balance').textContent = (planet.credits || 0).toLocaleString() + ' ₢';
+
+  // Owner badge na topbar de órbita
+  const ownerBadge = document.getElementById('orbit-owner-badge');
+  if (planet.ownerName) {
+    const ownerColor = playerColorMap[planet.ownerId] || '#4a90d9';
+    document.getElementById('orbit-owner-dot').style.background = ownerColor;
+    document.getElementById('orbit-owner-name').textContent = planet.ownerName;
+    ownerBadge.style.display = 'flex';
+    ownerBadge.style.borderColor = ownerColor + '44';
+  } else {
+    ownerBadge.style.display = 'none';
+  }
 
   renderBuildingsList(planet);
 
@@ -4371,6 +4393,10 @@ async function advanceTick() {
     }
   }
 
+  // Atualizar UI de órbita se estiver aberta
+  if (orbitPlanet) {
+    document.getElementById('op-balance').textContent = (orbitPlanet.credits || 0).toLocaleString() + ' ₢';
+  }
   showSaved();
   loadAdminStats();
   alert(`Mês avançado! +${totalNew.toLocaleString()} ₢ distribuídos.`);
@@ -4397,7 +4423,9 @@ async function buyBuilding(planet, type) {
   await savePlanet(planet);
   renderBuildingsList(planet);
   const credEl = document.getElementById('op-credits');
-  if (credEl) credEl.textContent = (planet.credits || 0).toLocaleString() + ' ₢';
+  if (credEl) credEl.textContent = calcMonthlyCredits(planet).toLocaleString() + ' ₢';
+  const balEl = document.getElementById('op-balance');
+  if (balEl) balEl.textContent = (planet.credits || 0).toLocaleString() + ' ₢';
 }
 
 /* ── Upgrade de construção ── */
