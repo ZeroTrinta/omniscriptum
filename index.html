@@ -7020,11 +7020,15 @@ function initAuth() {
       currentUser = user;
       await loadCurrentPlayer(user.uid);
       await loadGameState();
+      initPresence(user.uid);
+      updateUserBadge();
       fbReady = true;
-      // Esconder login
+      // Esconder tela de login
       const ls = document.getElementById('login-screen');
       ls.classList.add('hidden');
-      setTimeout(() => ls.style.display = 'none', 600);
+      setTimeout(() => ls.style.display = 'none', 500);
+      // Abrir loading + tela de sessão
+      openSessionScreen();
     } else {
       currentUser = null; currentPlayer = null; fbReady = false;
       document.getElementById('login-screen').style.display = 'flex';
