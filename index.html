@@ -818,6 +818,156 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 .admin-remove-btn:hover { background: rgba(120,20,20,0.6); color: #e08080; }
 .admin-player-email { font-size: 10px; color: #2a4060; font-family: monospace; }
 
+
+/* ===== TIME DISPLAY ===== */
+#game-date-display {
+  position: fixed; bottom: 14px; right: 16px; z-index: 80;
+  display: none; flex-direction: column; align-items: flex-end;
+  background: rgba(5,8,20,0.85); border: 0.5px solid rgba(100,150,255,0.12);
+  border-radius: 10px; padding: 6px 12px; backdrop-filter: blur(8px);
+  user-select: none;
+}
+#game-date-display.visible { display: flex; }
+#game-date-year {
+  font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700;
+  color: #80b0e0; letter-spacing: .1em;
+}
+#game-date-day {
+  font-size: 10px; color: #3a5880; letter-spacing: .06em;
+  font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+}
+
+/* ===== TIME PROGRESS IN ADMIN ===== */
+.admin-time-block { margin-top: .8rem; }
+.admin-time-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 5px;
+}
+.admin-time-label { font-size: 9px; color: #344870; text-transform: uppercase; letter-spacing: .08em; }
+.admin-time-value { font-size: 11px; font-weight: 600; color: #80a0c0; font-family: 'Orbitron', sans-serif; }
+.admin-progress-track {
+  height: 6px; background: rgba(30,50,100,.4);
+  border-radius: 3px; overflow: hidden;
+  border: 0.5px solid rgba(100,150,255,.1);
+}
+.admin-progress-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, #2a6abf, #5090e0);
+  transition: width .5s linear;
+}
+.admin-time-paused { color: #c09030 !important; }
+.admin-progress-fill.paused { background: linear-gradient(90deg, #7a5010, #c09030); }
+
+
+/* ===== EDIT PLAYER DRAWER ===== */
+#edit-player-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 320px;
+  background: rgba(5,9,22,0.99); border-left: 0.5px solid rgba(100,150,255,0.18);
+  z-index: 1100; display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  backdrop-filter: blur(16px);
+}
+#edit-player-drawer.open { transform: translateX(0); }
+#epd-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 1.2rem 1.4rem; border-bottom: 0.5px solid rgba(100,150,255,0.1);
+  flex-shrink: 0;
+}
+#epd-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff; font-family: 'Orbitron', sans-serif;
+}
+#epd-title { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 600; color: #c0d8ff; flex: 1; }
+#epd-close {
+  background: none; border: 0.5px solid rgba(100,150,255,0.2);
+  border-radius: 50%; width: 26px; height: 26px; color: #506090;
+  cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+#epd-close:hover { background: rgba(255,255,255,0.08); color: #c0d0f0; }
+#epd-body { flex: 1; overflow-y: auto; padding: 1rem 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.epd-section { display: flex; flex-direction: column; gap: 6px; }
+.epd-section-title {
+  font-size: 9px; color: #344870; text-transform: uppercase;
+  letter-spacing: .09em; font-family: 'Rajdhani', sans-serif; margin-bottom: 2px;
+}
+.epd-input {
+  background: rgba(15,25,60,0.6); border: 0.5px solid rgba(100,150,255,0.2);
+  border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #c0d0f0;
+  font-family: 'Rajdhani', sans-serif; outline: none; transition: border-color .2s; width: 100%;
+}
+.epd-input:focus { border-color: rgba(100,180,255,0.5); }
+.epd-credit-row { display: flex; gap: 6px; align-items: center; }
+.epd-credit-row .epd-input { flex: 1; }
+.epd-credit-btn {
+  padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Rajdhani', sans-serif; letter-spacing: .06em;
+  transition: all .2s; border: 0.5px solid; white-space: nowrap;
+}
+.epd-btn-add { background: rgba(20,60,30,.5); border-color: rgba(60,180,80,.3); color: #60c070; }
+.epd-btn-add:hover { background: rgba(20,80,30,.7); color: #90e0a0; }
+.epd-btn-sub { background: rgba(60,20,20,.5); border-color: rgba(180,60,60,.3); color: #c06060; }
+.epd-btn-sub:hover { background: rgba(80,20,20,.7); color: #e08080; }
+
+/* Lista de planetas do jogador no drawer */
+.epd-planet-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 7px;
+  background: rgba(15,25,60,.4); border: 0.5px solid rgba(100,150,255,.08);
+  transition: border-color .15s;
+}
+.epd-planet-row:hover { border-color: rgba(100,150,255,.25); }
+.epd-planet-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.epd-planet-name { font-size: 12px; color: #90b0d0; flex: 1; }
+.epd-planet-type { font-size: 10px; color: #3a5070; }
+.epd-planet-unassign {
+  background: none; border: 0.5px solid rgba(200,80,80,.2);
+  border-radius: 50%; width: 20px; height: 20px; color: #c06060;
+  cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.epd-planet-unassign:hover { background: rgba(120,20,20,.5); color: #e08080; }
+
+/* Assign planet no drawer */
+#epd-assign-select {
+  background: rgba(15,25,60,0.6); border: 0.5px solid rgba(100,150,255,0.2);
+  border-radius: 8px; padding: 7px 10px; font-size: 12px; color: #c0d0f0;
+  font-family: 'Rajdhani', sans-serif; outline: none; width: 100%;
+}
+.epd-assign-row { display: flex; gap: 6px; }
+.epd-assign-btn {
+  padding: 7px 14px; border-radius: 8px; font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: 'Rajdhani', sans-serif; transition: all .2s;
+  background: rgba(30,60,160,.4); border: 0.5px solid rgba(80,140,255,.3); color: #80b0ff;
+  white-space: nowrap;
+}
+.epd-assign-btn:hover { background: rgba(40,80,200,.5); color: #c0d8ff; }
+
+#epd-footer {
+  padding: 1rem 1.4rem; border-top: 0.5px solid rgba(100,150,255,.08);
+  display: flex; gap: 8px; flex-shrink: 0;
+}
+.epd-save-btn {
+  flex: 1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Rajdhani', sans-serif; letter-spacing: .07em;
+  text-transform: uppercase; transition: all .2s;
+}
+.epd-save-btn-confirm { background: rgba(30,70,180,.4); border: 0.5px solid rgba(80,150,255,.4); color: #80b0ff; }
+.epd-save-btn-confirm:hover { background: rgba(40,90,220,.6); color: #c0d8ff; }
+.epd-save-btn-delete { background: rgba(80,20,20,.4); border: 0.5px solid rgba(200,80,80,.3); color: #c06060; flex: 0; padding: 10px 16px; }
+.epd-save-btn-delete:hover { background: rgba(100,25,25,.6); color: #e08080; }
+
+/* Botão de editar nos rows */
+.admin-edit-btn {
+  background: rgba(20,35,80,.5); border: 0.5px solid rgba(100,150,255,.2);
+  border-radius: 50%; width: 22px; height: 22px; font-size: 11px; color: #6080c0;
+  cursor: pointer; transition: all .15s; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.admin-edit-btn:hover { background: rgba(40,70,180,.5); color: #c0d8ff; }
+
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -880,16 +1030,18 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
   <canvas id="galaxy"></canvas>
 </div>
 
+<div id="game-date-display">
+  <div id="game-date-year">ANO 3036</div>
+  <div id="game-date-day">Dia 1 de Janeiro</div>
+</div>
+
 <div id="hint"><span class="hint-desktop">Shift + Arraste = mover com imã · Alt + Arraste = mover livre · Scroll para zoom · Clique para detalhes</span><span class="hint-mobile">Toque para detalhes · Segure para arrastar · Pinça para zoom</span></div>
 
 <div id="panel">
   <div id="panel-header">
     <div id="planet-name-row" style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
       <div id="planet-name" style="margin-bottom:0;flex:1"></div>
-      <button id="btn-assign-planet" title="Atribuir planeta a um jogador">
-      ◈ Atribuir Planeta
-    </button>
-    <button id="btn-orbit" title="Entrar em Órbita">
+      <button id="btn-orbit" title="Entrar em Órbita">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
           <path d="M5 12a7 7 0 0 1 14 0"/>
           <path d="M5 12a7 7 0 0 0 12.5 4.3"/>
@@ -1108,6 +1260,15 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
     <button class="admin-btn admin-btn-amber" id="admin-pause-btn">⏸ Pausar Tempo</button>
     <button class="admin-btn admin-btn-red" id="admin-sync-btn">☁ Sincronizar Planetas</button>
   </div>
+  <div class="admin-time-block">
+    <div class="admin-time-header">
+      <span class="admin-time-label" id="admin-time-label">Progresso do mês</span>
+      <span class="admin-time-value" id="admin-time-value">Dia 1 / 30</span>
+    </div>
+    <div class="admin-progress-track">
+      <div class="admin-progress-fill" id="admin-progress-fill" style="width:0%"></div>
+    </div>
+  </div>
   <div class="admin-sep"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
     <div style="font-size:9px;color:#344870;text-transform:uppercase;letter-spacing:.09em;font-family:'Rajdhani',sans-serif">Jogadores</div>
@@ -1129,6 +1290,52 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
 
 
 <!-- ASSIGN POPUP -->
+
+<!-- EDIT PLAYER DRAWER -->
+<div id="edit-player-drawer">
+  <div id="epd-header">
+    <div id="epd-avatar">—</div>
+    <div id="epd-title">Editar Jogador</div>
+    <button id="epd-close">✕</button>
+  </div>
+  <div id="epd-body">
+    <div class="epd-section">
+      <div class="epd-section-title">Nome</div>
+      <input class="epd-input" id="epd-name" placeholder="Nome do jogador">
+    </div>
+    <div class="epd-section">
+      <div class="epd-section-title">E-mail (login)</div>
+      <input class="epd-input" id="epd-email" placeholder="—" disabled style="opacity:.5;cursor:not-allowed">
+    </div>
+    <div class="epd-section">
+      <div class="epd-section-title">Créditos atuais</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:#6adc8a;margin-bottom:4px" id="epd-credits-display">0 ₢</div>
+      <div class="epd-credit-row">
+        <input class="epd-input" id="epd-credit-amount" type="number" min="0" placeholder="Quantidade">
+        <button class="epd-credit-btn epd-btn-add" id="epd-btn-add-credits">+ Adicionar</button>
+        <button class="epd-credit-btn epd-btn-sub" id="epd-btn-sub-credits">− Remover</button>
+      </div>
+    </div>
+    <div class="epd-section">
+      <div class="epd-section-title">Planetas controlados</div>
+      <div id="epd-planets-list"></div>
+    </div>
+    <div class="epd-section">
+      <div class="epd-section-title">Atribuir planeta</div>
+      <div class="epd-assign-row">
+        <select id="epd-assign-select">
+          <option value="">— Selecionar planeta —</option>
+        </select>
+        <button class="epd-assign-btn" id="epd-assign-btn">Atribuir</button>
+      </div>
+    </div>
+  </div>
+  <div id="epd-footer">
+    <button class="epd-save-btn epd-save-btn-delete" id="epd-delete-btn">✕ Remover</button>
+    <button class="epd-save-btn epd-save-btn-confirm" id="epd-save-btn">Salvar Alterações</button>
+  </div>
+</div>
+
 <div id="assign-popup-overlay">
   <div id="assign-popup">
     <div id="assign-popup-header">
@@ -2518,9 +2725,7 @@ function showPanel(p) {
     document.getElementById('planet-type').after(badge);
   }
   document.getElementById('planet-desc').textContent = p.desc;
-  // Botão de atribuição (só mestre)
-  const assignBtn = document.getElementById('btn-assign-planet');
-  assignBtn.style.display = isMaster() ? 'flex' : 'none';
+
   // Estrelas (dragões anciões)
   const starsEl = document.getElementById('planet-stars');
   const stars = PLANET_STARS_MAP[p.name] || [];
@@ -3202,6 +3407,273 @@ function calcMonthlyCredits(planet) {
 }
 
 
+
+
+/* ==========================================================
+   MOTOR DE TEMPO — 1s real = 1 dia in-game, 30 dias = 1 mês
+   ========================================================== */
+
+const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DAYS_PER_MONTH = 30;
+const MS_PER_DAY = 1000; // 1 segundo real = 1 dia
+
+// Estado do tempo — salvo no Firestore em game_state
+let timeState = {
+  year: 3036, month: 0, day: 1,  // Janeiro, dia 1
+  paused: false,
+  lastRealTime: Date.now(),       // timestamp real de quando o tempo foi retomado
+};
+let timeInterval = null;
+
+function formatGameDate() {
+  return {
+    year: `ANO ${timeState.year}`,
+    day: `${timeState.day} de ${MONTHS_PT[timeState.month]}`,
+  };
+}
+
+function updateDateUI() {
+  const { year, day } = formatGameDate();
+  const yearEl = document.getElementById('game-date-year');
+  const dayEl  = document.getElementById('game-date-day');
+  if (yearEl) yearEl.textContent = year;
+  if (dayEl)  dayEl.textContent  = day;
+
+  // Barra de progresso no admin
+  const pct = ((timeState.day - 1) / DAYS_PER_MONTH) * 100;
+  const fill = document.getElementById('admin-progress-fill');
+  const val  = document.getElementById('admin-time-value');
+  const lbl  = document.getElementById('admin-time-label');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.classList.toggle('paused', timeState.paused);
+  }
+  if (val) val.textContent = `Dia ${timeState.day} / ${DAYS_PER_MONTH}`;
+  if (lbl) {
+    lbl.textContent = timeState.paused ? '⏸ Tempo pausado' : 'Progresso do mês';
+    lbl.classList.toggle('admin-time-paused', timeState.paused);
+  }
+}
+
+function tickOneDay() {
+  if (timeState.paused) return;
+  timeState.day++;
+  if (timeState.day > DAYS_PER_MONTH) {
+    // Novo mês — disparar economia
+    timeState.day = 1;
+    timeState.month++;
+    if (timeState.month >= 12) { timeState.month = 0; timeState.year++; }
+    runMonthlyEconomy();
+  }
+  timeState.lastRealTime = Date.now();
+  updateDateUI();
+  saveTimeState();
+}
+
+async function runMonthlyEconomy() {
+  // Igual ao advanceTick mas automático, sem alert
+  if (!window._fb || !isMaster()) return;
+  const { db, doc, updateDoc, getDoc } = window._fb;
+  const playerCredits = {};
+  for (const p of PLANETS) {
+    if (!p.buildings || p.buildings.length === 0) continue;
+    let earned = 0;
+    p.buildings.forEach(b => {
+      if (b.constructing) return;
+      const tbl = CREDITS_PER_TICK[b.type];
+      earned += tbl ? (tbl[Math.min(b.level || 1, 5)] || 0) : 0;
+    });
+    if (earned === 0) continue;
+    p.credits = (p.credits || 0) + earned;
+    p.lastTick = Date.now();
+    if (p.ownerId) playerCredits[p.ownerId] = (playerCredits[p.ownerId] || 0) + earned;
+    await updateDoc(doc(db, 'planets', String(p.id)), { credits: p.credits, lastTick: p.lastTick });
+  }
+  for (const [uid, earned] of Object.entries(playerCredits)) {
+    const pRef = doc(db, 'players', uid);
+    const snap = await getDoc(pRef);
+    if (snap.exists()) {
+      await updateDoc(pRef, { credits: (snap.data().credits || 0) + earned });
+    }
+  }
+  if (orbitPlanet) {
+    document.getElementById('op-balance').textContent = (orbitPlanet.credits || 0).toLocaleString() + ' ₢';
+  }
+  loadAdminStats();
+}
+
+async function saveTimeState() {
+  if (!window._fb || !isMaster()) return;
+  const { db, doc, setDoc } = window._fb;
+  try {
+    await setDoc(doc(db, 'game_state', 'time'), {
+      year: timeState.year, month: timeState.month,
+      day: timeState.day, paused: timeState.paused,
+      lastRealTime: Date.now(),
+    });
+  } catch(e) {}
+}
+
+async function loadTimeState() {
+  if (!window._fb) return;
+  const { db, doc, getDoc, onSnapshot } = window._fb;
+
+  // Escutar mudanças em tempo real (para jogadores verem a data atualizar)
+  onSnapshot(doc(db, 'game_state', 'time'), snap => {
+    if (!snap.exists()) {
+      // Primeira vez — inicializar
+      if (isMaster()) saveTimeState();
+      return;
+    }
+    const d = snap.data();
+    timeState.year   = d.year   || 3036;
+    timeState.month  = d.month  || 0;
+    timeState.day    = d.day    || 1;
+    timeState.paused = d.paused || false;
+    timeState.lastRealTime = d.lastRealTime || Date.now();
+    updateDateUI();
+
+    // Só o mestre roda o motor de tempo
+    if (isMaster()) startTimerIfNeeded();
+  });
+}
+
+function startTimerIfNeeded() {
+  if (timeInterval) clearInterval(timeInterval);
+  if (!timeState.paused) {
+    timeInterval = setInterval(tickOneDay, MS_PER_DAY);
+  }
+}
+
+function togglePause() {
+  timeState.paused = !timeState.paused;
+  const btn = document.getElementById('admin-pause-btn');
+  if (btn) btn.textContent = timeState.paused ? '▶ Retomar Tempo' : '⏸ Pausar Tempo';
+  if (isMaster()) {
+    startTimerIfNeeded();
+    saveTimeState();
+  }
+  updateDateUI();
+}
+
+
+/* ==========================================================
+   EDIT PLAYER SYSTEM
+   ========================================================== */
+let editingPlayer = null;
+
+function openEditPlayer(uid) {
+  const pl = allPlayers.find(p => p.uid === uid);
+  if (!pl) return;
+  editingPlayer = { ...pl };
+
+  // Preencher header
+  const initials = (pl.name || pl.email).slice(0, 2).toUpperCase();
+  const av = document.getElementById('epd-avatar');
+  av.textContent = initials;
+  av.style.background = pl.color || '#4a70d0';
+
+  document.getElementById('epd-title').textContent = pl.name || pl.email.split('@')[0];
+  document.getElementById('epd-name').value = pl.name || '';
+  document.getElementById('epd-email').value = pl.email || '';
+  document.getElementById('epd-credits-display').textContent = (pl.credits || 0).toLocaleString() + ' ₢';
+  document.getElementById('epd-credit-amount').value = '';
+
+  // Planetas controlados
+  renderEpdPlanets(uid);
+
+  // Select de planetas disponíveis (sem dono ou com outro dono)
+  const sel = document.getElementById('epd-assign-select');
+  sel.innerHTML = '<option value="">— Selecionar planeta —</option>' +
+    PLANETS.filter(p => !p.ownerId || p.ownerId !== uid)
+      .map(p => `<option value="${p.id}">${p.name} ${p.ownerId ? '(trocar de dono)' : ''}</option>`)
+      .join('');
+
+  document.getElementById('edit-player-drawer').classList.add('open');
+}
+
+function renderEpdPlanets(uid) {
+  const owned = PLANETS.filter(p => p.ownerId === uid);
+  const list = document.getElementById('epd-planets-list');
+  if (owned.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:#2a4060;padding:4px 0">Nenhum planeta atribuído.</div>';
+    return;
+  }
+  list.innerHTML = owned.map(p => `
+    <div class="epd-planet-row">
+      <div class="epd-planet-dot" style="background:${p.color}"></div>
+      <span class="epd-planet-name">${p.name}</span>
+      <span class="epd-planet-type">${p.type}</span>
+      <button class="epd-planet-unassign" onclick="unassignPlanet(${p.id})" title="Remover planeta">✕</button>
+    </div>`).join('');
+}
+
+async function unassignPlanet(planetId) {
+  const p = PLANETS.find(pl => pl.id === planetId);
+  if (!p) return;
+  const { db, doc, updateDoc } = window._fb;
+  p.ownerId = null; p.ownerName = null;
+  await updateDoc(doc(db, 'planets', String(p.id)), { ownerId: null, ownerName: null });
+  renderEpdPlanets(editingPlayer.uid);
+  updateOwnerLegend();
+  showSaved();
+}
+
+async function assignPlanetToEditing() {
+  const sel = document.getElementById('epd-assign-select');
+  const planetId = parseInt(sel.value);
+  if (!planetId || !editingPlayer) return;
+  const p = PLANETS.find(pl => pl.id === planetId);
+  if (!p) return;
+  const { db, doc, updateDoc } = window._fb;
+  p.ownerId = editingPlayer.uid;
+  p.ownerName = editingPlayer.name || editingPlayer.email.split('@')[0];
+  await updateDoc(doc(db, 'planets', String(p.id)), { ownerId: p.ownerId, ownerName: p.ownerName });
+  sel.value = '';
+  renderEpdPlanets(editingPlayer.uid);
+  updateOwnerLegend();
+  showSaved();
+}
+
+async function applyCredits(add) {
+  const amount = parseInt(document.getElementById('epd-credit-amount').value) || 0;
+  if (amount <= 0) return;
+  const { db, doc, updateDoc } = window._fb;
+  const delta = add ? amount : -amount;
+  editingPlayer.credits = Math.max(0, (editingPlayer.credits || 0) + delta);
+  await updateDoc(doc(db, 'players', editingPlayer.uid), { credits: editingPlayer.credits });
+  // Atualizar em allPlayers
+  const idx = allPlayers.findIndex(p => p.uid === editingPlayer.uid);
+  if (idx >= 0) allPlayers[idx].credits = editingPlayer.credits;
+  document.getElementById('epd-credits-display').textContent = editingPlayer.credits.toLocaleString() + ' ₢';
+  document.getElementById('epd-credit-amount').value = '';
+  showSaved();
+}
+
+async function saveEditPlayer() {
+  if (!editingPlayer) return;
+  const newName = document.getElementById('epd-name').value.trim();
+  if (!newName) { alert('Nome não pode ser vazio.'); return; }
+  const { db, doc, updateDoc } = window._fb;
+  editingPlayer.name = newName;
+  await updateDoc(doc(db, 'players', editingPlayer.uid), { name: newName });
+  // Atualizar ownerName nos planetas desse jogador
+  for (const p of PLANETS.filter(pl => pl.ownerId === editingPlayer.uid)) {
+    p.ownerName = newName;
+    await updateDoc(doc(db, 'planets', String(p.id)), { ownerName: newName });
+  }
+  const idx = allPlayers.findIndex(p => p.uid === editingPlayer.uid);
+  if (idx >= 0) allPlayers[idx].name = newName;
+  closeEditPlayer();
+  loadAdminStats();
+  showSaved();
+}
+
+function closeEditPlayer() {
+  document.getElementById('edit-player-drawer').classList.remove('open');
+  editingPlayer = null;
+}
 
 /* ==========================================================
    OWNERSHIP SYSTEM
@@ -4059,6 +4531,16 @@ document.getElementById('orbit-back').addEventListener('click', () => {
   closeOrbitScreen();
 });
 
+// Edit player drawer
+document.getElementById('epd-close').addEventListener('click', closeEditPlayer);
+document.getElementById('epd-save-btn').addEventListener('click', saveEditPlayer);
+document.getElementById('epd-delete-btn').addEventListener('click', () => {
+  if (editingPlayer) { closeEditPlayer(); removePlayer(editingPlayer.uid, editingPlayer.name); }
+});
+document.getElementById('epd-btn-add-credits').addEventListener('click', () => applyCredits(true));
+document.getElementById('epd-btn-sub-credits').addEventListener('click', () => applyCredits(false));
+document.getElementById('epd-assign-btn').addEventListener('click', assignPlanetToEditing);
+
 // Admin — adicionar jogador
 document.getElementById('admin-add-player-btn').addEventListener('click', () => {
   const form = document.getElementById('admin-add-player-form');
@@ -4081,10 +4563,7 @@ document.getElementById('admin-create-player-btn').addEventListener('click', asy
   document.getElementById('admin-create-player-btn').textContent = 'Criar Jogador';
 });
 
-// Assign popup listeners
-document.getElementById('btn-assign-planet').addEventListener('click', () => {
-  if (selectedPlanet) openAssignPopup(selectedPlanet);
-});
+// btn-assign-planet removido — atribuição agora feita pelo painel de edição de jogador
 document.getElementById('assign-popup-close').addEventListener('click', closeAssignPopup);
 document.getElementById('assign-btn-confirm').addEventListener('click', confirmAssign);
 document.getElementById('assign-btn-remove').addEventListener('click', removeOwner);
@@ -4393,6 +4872,13 @@ async function advanceTick() {
     }
   }
 
+  // Avançar data para próximo mês
+  timeState.day = 1;
+  timeState.month++;
+  if (timeState.month >= 12) { timeState.month = 0; timeState.year++; }
+  await saveTimeState();
+  updateDateUI();
+
   // Atualizar UI de órbita se estiver aberta
   if (orbitPlanet) {
     document.getElementById('op-balance').textContent = (orbitPlanet.credits || 0).toLocaleString() + ' ₢';
@@ -4480,7 +4966,7 @@ async function loadAdminStats() {
           <span class="admin-player-name" style="flex:1">${r.name}</span>
           <span class="admin-player-planets">${r.planets} planetas</span>
           <span class="admin-player-credits">${r.credits.toLocaleString()} ₢</span>
-          <button class="admin-remove-btn" onclick="removePlayer('${r.uid}','${r.name}')" title="Remover jogador">✕</button>
+          <button class="admin-edit-btn" onclick="openEditPlayer('${r.uid}')" title="Editar jogador">✎</button>
         </div>
         <div class="admin-player-email" style="padding-left:16px">${r.email}</div>
       </div>`).join('')
@@ -4544,11 +5030,8 @@ function initAuth() {
     document.getElementById('admin-panel').classList.remove('open');
   });
   document.getElementById('admin-tick-btn').addEventListener('click', advanceTick);
-  document.getElementById('admin-pause-btn').addEventListener('click', async () => {
-    if (!isMaster()) return;
-    const { db, doc, setDoc } = window._fb;
-    gameState.paused = !gameState.paused;
-    await setDoc(doc(db, 'game_state', 'main'), gameState);
+  document.getElementById('admin-pause-btn').addEventListener('click', () => {
+    togglePause();
   });
   document.getElementById('admin-sync-btn').addEventListener('click', () => {
     if (confirm('Sincronizar todos os planetas locais para o servidor? Isso sobrescreve os dados existentes.')) {
