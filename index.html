@@ -658,14 +658,19 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 
 /* ===== ADMIN PANEL ===== */
 #admin-panel {
-  position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-110%);
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-120%);
   z-index: 500; background: rgba(6,10,22,.98);
   border: 0.5px solid rgba(100,150,255,.2); border-radius: 14px;
   padding: 1.4rem; width: 480px; max-width: 96vw;
-  transition: transform .35s cubic-bezier(.4,0,.2,1);
+  transition: transform .35s cubic-bezier(.4,0,.2,1), visibility 0s .35s;
   backdrop-filter: blur(16px);
+  visibility: hidden; pointer-events: none;
 }
-#admin-panel.open { transform: translateX(-50%) translateY(0); }
+#admin-panel.open {
+  transform: translateX(-50%) translateY(0);
+  visibility: visible; pointer-events: all;
+  transition: transform .35s cubic-bezier(.4,0,.2,1), visibility 0s 0s;
+}
 #admin-title {
   font-family: 'Orbitron',sans-serif; font-size: 13px; font-weight: 600;
   color: #c0d8ff; margin-bottom: 1rem; letter-spacing: .08em;
@@ -1023,6 +1028,52 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 .sb-planet-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .sb-planet-name { font-size: 10px; color: #5070a0; font-family: 'Rajdhani', sans-serif; white-space: nowrap; }
 .sb-planet-income { font-size: 10px; color: #3a9a50; font-family: 'Orbitron', sans-serif; white-space: nowrap; }
+
+
+/* ===== SHIP BUILD POPUP ===== */
+#ship-build-overlay {
+  position: fixed; inset: 0; z-index: 1050;
+  background: rgba(0,0,8,.82); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+#ship-build-overlay.active { opacity: 1; pointer-events: all; }
+#ship-build-popup {
+  background: rgba(5,9,22,.99); border: 0.5px solid rgba(100,150,255,.22);
+  border-radius: 16px; width: 460px; max-width: 95vw; overflow: hidden;
+}
+#ship-build-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.4rem; border-bottom: 0.5px solid rgba(100,150,255,.1);
+}
+#ship-build-title { font-family: 'Orbitron',sans-serif; font-size: 13px; font-weight: 600; color: #c0d8ff; letter-spacing: .08em; }
+#ship-build-close { background: none; border: 0.5px solid rgba(100,150,255,.2); border-radius: 50%; width: 26px; height: 26px; color: #6080b0; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+#ship-build-close:hover { background: rgba(255,255,255,.08); color: #c0d0f0; }
+#ship-build-grid { display: flex; flex-direction: column; gap: 8px; padding: 1.2rem 1.4rem; }
+.ship-build-card {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(12,20,50,.7); border: 0.5px solid rgba(100,150,255,.12);
+  border-radius: 10px; padding: .9rem 1.1rem; cursor: pointer; transition: all .2s;
+}
+.ship-build-card:hover { border-color: rgba(100,180,255,.4); background: rgba(20,40,90,.6); }
+.ship-build-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.ship-build-info { flex: 1; }
+.ship-build-name { font-size: 13px; font-weight: 600; color: #b0c8e8; margin-bottom: 2px; }
+.ship-build-desc { font-size: 11px; color: #4a6080; margin-bottom: 4px; }
+.ship-build-meta { display: flex; gap: 12px; font-size: 10px; }
+.ship-build-cost  { color: #e0a040; font-family: 'Orbitron',sans-serif; }
+.ship-build-maint { color: #e06060; font-family: 'Orbitron',sans-serif; }
+.ship-build-time  { color: #4a6080; }
+
+/* Frota no painel — timer de construção */
+.ship-building-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 6px; margin-bottom: 4px;
+  background: rgba(40,25,5,.5); border: 0.5px solid rgba(255,180,40,.25);
+}
+.ship-building-name { font-size: 11px; color: #e0a040; flex: 1; }
+.ship-building-bar { flex: 1; height: 3px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
+.ship-building-fill { height: 100%; background: linear-gradient(90deg,#c07820,#e0b040); border-radius: 2px; transition: width .3s; }
 
 </style>
 <script type="module">
@@ -1488,19 +1539,29 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
       </div>
       <div class="op-section">
         <div class="op-title">Economia</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
           <div class="op-economy-credit" style="flex-direction:column;gap:2px">
-            <div class="op-econ-label">Renda acumulada</div>
-            <div class="op-econ-value" id="op-balance" style="font-size:15px">— ₢</div>
+            <div class="op-econ-label">Renda / mês</div>
+            <div class="op-econ-value" id="op-income" style="font-size:13px;color:#5acc80">— ₢</div>
+          </div>
+          <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(200,80,80,.2)">
+            <div class="op-econ-label">Déficit / mês</div>
+            <div class="op-econ-value" id="op-deficit" style="font-size:13px;color:#e06060">— ₢</div>
           </div>
           <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(100,200,150,.15)">
-            <div class="op-econ-label">Geração / mês</div>
-            <div class="op-econ-value" id="op-credits" style="font-size:15px;color:#80c0a0">— ₢</div>
+            <div class="op-econ-label">Saldo líquido</div>
+            <div class="op-econ-value" id="op-credits" style="font-size:13px">— ₢</div>
           </div>
         </div>
-        <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(100,180,255,.15)">
-          <div class="op-econ-label">Seus créditos (para construir)</div>
-          <div class="op-econ-value" id="op-player-balance" style="font-size:15px;color:#80b8ff">— ₢</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(100,150,255,.12)">
+            <div class="op-econ-label">Tesouro do planeta</div>
+            <div class="op-econ-value" id="op-balance" style="font-size:13px;color:#80a8e0">— ₢</div>
+          </div>
+          <div class="op-economy-credit" style="flex-direction:column;gap:2px;border-color:rgba(100,180,255,.15)">
+            <div class="op-econ-label">Seus créditos</div>
+            <div class="op-econ-value" id="op-player-balance" style="font-size:13px;color:#80b8ff">— ₢</div>
+          </div>
         </div>
       </div>
       <div class="op-section op-buildings-section">
@@ -1544,6 +1605,18 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
 
 
 <!-- BUILD POPUP -->
+
+<!-- SHIP BUILD POPUP -->
+<div id="ship-build-overlay">
+  <div id="ship-build-popup">
+    <div id="ship-build-header">
+      <div id="ship-build-title">Construir Nave</div>
+      <button id="ship-build-close">✕</button>
+    </div>
+    <div id="ship-build-grid"></div>
+  </div>
+</div>
+
 <div id="build-popup-overlay">
   <div id="build-popup">
     <div id="build-popup-header">
@@ -3456,7 +3529,7 @@ let warpCtx = null;
 /* ===== DADOS DE CONSTRUÇÕES ===== */
 const BUILDING_TYPES = {
   refinery:    { name: 'Refinaria',    icon: '⚙', color: '#c87030', credits: 800,  desc: 'Extrai e processa minerais brutos.' },
-  spaceport:   { name: 'Espaçoporto', icon: '🚀', color: '#3a90d4', credits: 1200, desc: 'Hub de comércio e transporte orbital.' },
+  spaceport:   { name: 'Espaçoporto', icon: '🚀', color: '#3a90d4', credits: 0, deficit: 500, desc: 'Base orbital militar. Permite construir naves. Gera déficit mensal de manutenção.', isFleetHub: true },
   generator:   { name: 'Gerador',     icon: '⚡', color: '#d4c030', credits: 600,  desc: 'Fornece energia para a colônia.' },
   barracks:    { name: 'Quartel',      icon: '⚔', color: '#c04040', credits: 400,  desc: 'Treina e abriga forças militares.' },
   farm:        { name: 'Fazenda',      icon: '⬡', color: '#40a050', credits: 350,  desc: 'Produção de alimentos e suprimentos.' },
@@ -3464,6 +3537,22 @@ const BUILDING_TYPES = {
   shipyard:    { name: 'Estaleiro',    icon: '◈', color: '#4060c0', credits: 1500, desc: 'Construção e reparo de naves.' },
   colony:      { name: 'Colônia',      icon: '⬟', color: '#30a090', credits: 500,  desc: 'Aumenta a capacidade populacional.' },
 };
+
+// Tipos de naves disponíveis no Espaçoporto
+const SHIP_TYPES_BUILD = {
+  corvette:  { name: 'Corvette',  icon: '◁', color: '#4a90d9', buildCost: 1500, maintainCost: 200, buildTime: 1000,  desc: 'Nave leve e ágil. Ideal para patrulha e escolta.' },
+  bomber:    { name: 'Bomber',    icon: '▽', color: '#c87030', buildCost: 4000, maintainCost: 500, buildTime: 3000,  desc: 'Bombardeiro pesado. Alto poder de fogo contra estruturas.' },
+  frigate:   { name: 'Fragata',   icon: '◆', color: '#9b59d4', buildCost: 8000, maintainCost: 900, buildTime: 5000,  desc: 'Nave de guerra versátil. Equilíbrio entre ataque e defesa.' },
+};
+
+// Custo mensal de manutenção total da frota (calculado dinamicamente)
+function calcFleetMaintain(planet) {
+  if (!planet.fleet || planet.fleet.length === 0) return 0;
+  return planet.fleet.reduce((sum, s) => {
+    const st = SHIP_TYPES_BUILD[s.type];
+    return sum + (st ? st.maintainCost * s.count : 0);
+  }, 0);
+}
 
 // Inicializar construções dos planetas (placeholder aleatório)
 function initPlanetBuildings(planet) {
@@ -3478,21 +3567,51 @@ function initPlanetBuildings(planet) {
 }
 
 function updateOrbitEconUI(planet) {
-  const credEl = document.getElementById('op-credits');
-  if (credEl) credEl.textContent = calcMonthlyCredits(planet).toLocaleString() + ' ₢';
-  const balEl = document.getElementById('op-balance');
-  if (balEl) balEl.textContent = (planet.credits || 0).toLocaleString() + ' ₢';
-  const pBalEl = document.getElementById('op-player-balance');
-  if (pBalEl) pBalEl.textContent = currentPlayer ? (currentPlayer.credits || 0).toLocaleString() + ' ₢' : '— ₢';
+  const income  = calcMonthlyIncome(planet);
+  const deficit = calcMonthlyDeficit(planet);
+  const net     = income - deficit;
+  const el = id => document.getElementById(id);
+  if (el('op-income'))  el('op-income').textContent  = '+' + income.toLocaleString() + ' ₢';
+  if (el('op-deficit')) el('op-deficit').textContent = deficit > 0 ? '-' + deficit.toLocaleString() + ' ₢' : '0 ₢';
+  const credEl = el('op-credits');
+  if (credEl) {
+    credEl.textContent = (net >= 0 ? '+' : '') + net.toLocaleString() + ' ₢';
+    credEl.style.color = net >= 0 ? '#5acc80' : '#e06060';
+  }
+  if (el('op-balance')) el('op-balance').textContent = (planet.credits || 0).toLocaleString() + ' ₢';
+  if (el('op-player-balance')) el('op-player-balance').textContent = currentPlayer ? (currentPlayer.credits || 0).toLocaleString() + ' ₢' : '— ₢';
 }
 
 function calcMonthlyCredits(planet) {
-  if (!planet.buildings || planet.buildings.length === 0) return 0;
-  return planet.buildings.reduce((sum, b) => {
-    if (b.constructing) return sum; // em construção não gera ainda
+  let income = 0, deficit = 0;
+  (planet.buildings || []).forEach(b => {
+    if (b.constructing) return;
+    const bt = BUILDING_TYPES[b.type];
+    const tbl = CREDITS_PER_TICK[b.type];
+    income += tbl ? (tbl[Math.min(b.level || 1, 5)] || 0) : 0;
+    if (bt && bt.deficit) deficit += bt.deficit * (b.level || 1);
+  });
+  // Manutenção da frota
+  deficit += calcFleetMaintain(planet);
+  return income - deficit;
+}
+
+// Separados para exibição
+function calcMonthlyIncome(planet) {
+  return (planet.buildings || []).reduce((sum, b) => {
+    if (b.constructing) return sum;
     const tbl = CREDITS_PER_TICK[b.type];
     return sum + (tbl ? (tbl[Math.min(b.level || 1, 5)] || 0) : 0);
   }, 0);
+}
+function calcMonthlyDeficit(planet) {
+  let d = 0;
+  (planet.buildings || []).forEach(b => {
+    if (b.constructing) return;
+    const bt = BUILDING_TYPES[b.type];
+    if (bt && bt.deficit) d += bt.deficit * (b.level || 1);
+  });
+  return d + calcFleetMaintain(planet);
 }
 
 
@@ -3618,9 +3737,12 @@ async function runMonthlyEconomy() {
     let earned = 0;
     p.buildings.forEach(b => {
       if (b.constructing) return;
+      const bt = BUILDING_TYPES[b.type];
       const tbl = CREDITS_PER_TICK[b.type];
       earned += tbl ? (tbl[Math.min(b.level || 1, 5)] || 0) : 0;
+      if (bt && bt.deficit) earned -= bt.deficit * (b.level || 1);
     });
+    earned -= calcFleetMaintain(p);
     if (earned === 0) continue;
     p.credits = (p.credits || 0) + earned;
     p.lastTick = Date.now();
@@ -4036,6 +4158,136 @@ function drawOwnerRing(p, pos, r) {
   ctx.restore();
 }
 
+
+/* ===================================================
+   SHIP BUILD SYSTEM
+   =================================================== */
+let shipBuildSpaceportIdx = -1;
+
+function openShipBuildPopup(spaceportIdx) {
+  shipBuildSpaceportIdx = spaceportIdx;
+  const grid = document.getElementById('ship-build-grid');
+  grid.innerHTML = Object.entries(SHIP_TYPES_BUILD).map(([key, st]) => `
+    <div class="ship-build-card" data-stype="${key}">
+      <div class="ship-build-icon" style="background:${st.color}22;color:${st.color}">${st.icon}</div>
+      <div class="ship-build-info">
+        <div class="ship-build-name">${st.name}</div>
+        <div class="ship-build-desc">${st.desc}</div>
+        <div class="ship-build-meta">
+          <span class="ship-build-cost">Custo: ${st.buildCost.toLocaleString()} ₢</span>
+          <span class="ship-build-maint">Mant.: ${st.maintainCost.toLocaleString()} ₢/mês</span>
+          <span class="ship-build-time">⏱ ${st.buildTime/1000}s</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.ship-build-card').forEach(card => {
+    card.addEventListener('click', () => {
+      buildShip(card.dataset.stype);
+      document.getElementById('ship-build-overlay').classList.remove('active');
+    });
+  });
+  document.getElementById('ship-build-overlay').classList.add('active');
+}
+
+async function buildShip(type) {
+  const planet = orbitPlanet;
+  if (!planet) return;
+  const st = SHIP_TYPES_BUILD[type];
+  if (!st) return;
+  const ownsIt = isMaster() || (currentPlayer && planet.ownerId === currentPlayer.uid);
+  if (!ownsIt) { alert('Você não controla este planeta.'); return; }
+  const playerCreds = currentPlayer ? (currentPlayer.credits || 0) : 0;
+  if (!isMaster() && playerCreds < st.buildCost) {
+    alert(`Créditos insuficientes!\nNecessário: ${st.buildCost.toLocaleString()} ₢\nSeus créditos: ${playerCreds.toLocaleString()} ₢`);
+    return;
+  }
+  // Debitar do jogador
+  if (!isMaster() && currentPlayer) {
+    currentPlayer.credits -= st.buildCost;
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'players', currentPlayer.uid), { credits: currentPlayer.credits });
+  }
+  // Adicionar nave em construção
+  planet.fleet = planet.fleet || [];
+  const now = Date.now();
+  planet.fleet.push({
+    type, name: st.name, count: 0,
+    constructing: true,
+    constructingStart: now,
+    constructingEnd: now + st.buildTime,
+  });
+  // Recalcular total
+  planet.fleetTotal = planet.fleet.filter(s => !s.constructing).reduce((s, n) => s + n.count, 0);
+  await savePlanet(planet);
+  renderFleetList(planet);
+  updateOrbitEconUI(planet);
+}
+
+function renderFleetList(planet) {
+  const fleetEl = document.getElementById('op-fleet');
+  const shipsEl = document.getElementById('op-ships-list');
+  if (!fleetEl || !shipsEl) return;
+
+  const activeFleet = (planet.fleet || []).filter(s => !s.constructing);
+  const building    = (planet.fleet || []).filter(s => s.constructing);
+
+  const total = activeFleet.reduce((s, n) => s + (n.count || 0), 0);
+  fleetEl.textContent = total > 0 ? total + ' naves' : 'Nenhuma';
+
+  // Naves em construção
+  let html = building.map((s, i) => {
+    const st = SHIP_TYPES_BUILD[s.type];
+    const pct = Math.min(100, ((Date.now() - s.constructingStart) / (s.constructingEnd - s.constructingStart)) * 100);
+    return `<div class="ship-building-row">
+      <span class="ship-building-name">▶ ${s.name}</span>
+      <div class="ship-building-bar"><div class="ship-building-fill" id="sbf-${i}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Naves prontas
+  html += activeFleet.map(s => {
+    const st = SHIP_TYPES_BUILD[s.type] || {};
+    return `<div class="op-ship-row">
+      <span class="op-ship-icon" style="color:${st.color||'#888'}">${st.icon||'◈'}</span>
+      <span class="op-ship-name">${s.name}</span>
+      <span class="op-ship-count">${s.count}x</span>
+    </div>`;
+  }).join('');
+
+  shipsEl.innerHTML = html || '<div style="font-size:11px;color:#2a3a50;padding:4px 0">Sem naves registradas.</div>';
+
+  // Tickar barras de construção
+  building.forEach((s, i) => {
+    const bar = document.getElementById(`sbf-${i}`);
+    if (!bar) return;
+    const tick = () => {
+      if (!s.constructing) return;
+      const now = Date.now();
+      if (now >= s.constructingEnd) {
+        s.constructing = false;
+        s.count = 1;
+        // Agrupar com naves do mesmo tipo
+        const existing = (planet.fleet || []).find(f => f.type === s.type && !f.constructing && f !== s);
+        if (existing) {
+          existing.count = (existing.count || 0) + 1;
+          planet.fleet = planet.fleet.filter(f => f !== s);
+        }
+        planet.fleetTotal = planet.fleet.filter(f => !f.constructing).reduce((sum, n) => sum + (n.count || 0), 0);
+        savePlanet(planet);
+        renderFleetList(planet);
+        updateOrbitEconUI(planet);
+        return;
+      }
+      const pct = Math.min(100, ((now - s.constructingStart) / (s.constructingEnd - s.constructingStart)) * 100);
+      if (bar) bar.style.width = pct + '%';
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 /* ===== SISTEMA DE CONSTRUÇÃO ===== */
 const BUILD_DURATION_MS = 5000; // 5 segundos universal
 
@@ -4052,16 +4304,26 @@ function renderBuildingsList(planet) {
     const lvlStars = '●'.repeat(b.level) + '○'.repeat(Math.max(0, 3 - b.level));
     const isBuilding = b.constructing && Date.now() < b.constructingEnd;
     const progress = isBuilding ? Math.min(100, ((Date.now() - b.constructingStart) / BUILD_DURATION_MS) * 100) : 100;
+    const isSpaceport = b.type === 'spaceport' && !isBuilding;
+    let creditBadge = '';
+    if (!isBuilding) {
+      if (bt.deficit) {
+        creditBadge = `<div class="op-building-credit" style="color:#e06060">-${(bt.deficit * (b.level||1)).toLocaleString()} ₢</div>`;
+      } else if (bt.credits) {
+        creditBadge = `<div class="op-building-credit">+${(bt.credits * (b.level||1)).toLocaleString()} ₢</div>`;
+      }
+    }
     return `<div class="op-building ${isBuilding ? 'building-constructing' : ''}" data-idx="${idx}">
       <div class="op-building-icon" style="background:${bt.color}22;color:${bt.color}">${bt.icon}</div>
-      <div class="op-building-info">
+      <div class="op-building-info" style="flex:1">
         ${isBuilding ? '<div class="build-status-badge">▶ Construindo</div>' : ''}
         <div class="op-building-name">${bt.name}</div>
         <div class="op-building-desc">${bt.desc}</div>
         <div class="op-building-lvl">${lvlStars} Nível ${b.level}</div>
         ${isBuilding ? `<div class="build-progress-bar"><div class="build-progress-fill" id="bpf-${idx}" style="width:${progress}%"></div></div>` : ''}
+        ${isSpaceport ? `<button class="epd-assign-btn" style="margin-top:6px;font-size:10px;padding:5px 10px" onclick="openShipBuildPopup(${idx})">+ Construir Nave</button>` : ''}
       </div>
-      ${!isBuilding ? `<div class="op-building-credit">+${(bt.credits * b.level).toLocaleString()} ₢</div>` : ''}
+      ${creditBadge}
     </div>`;
   }).join('');
 
@@ -4101,7 +4363,7 @@ function openBuildPopup() {
         <div class="build-card-icon" style="background:${bt.color}22;color:${bt.color}">${bt.icon}</div>
         <div>
           <div class="build-card-name">${bt.name}</div>
-          <div class="build-card-income">+${bt.credits.toLocaleString()} ₢/mês</div>
+          <div class="build-card-income" style="color:${bt.deficit ? '#e06060' : '#5acc80'}">${bt.deficit ? '-' + bt.deficit.toLocaleString() + ' ₢/mês (déficit)' : bt.credits > 0 ? '+' + bt.credits.toLocaleString() + ' ₢/mês' : 'Sem renda'}</div>
         </div>
       </div>
       <div class="build-card-desc">${bt.desc}</div>
@@ -4288,27 +4550,12 @@ function openOrbitScreen(planet) {
   }
   document.getElementById('op-fleet').textContent = planet.fleetTotal > 0 ? planet.fleetTotal + ' naves' : 'Nenhuma';
   document.getElementById('op-troops').textContent = planet.troops > 0 ? planet.troops.toLocaleString() : 'Nenhuma';
-  const SHIP_ICONS = {
-    'Fragata': '◇', 'Destruidor': '◆', 'Cruzador': '▷',
-    'Porta-naves': '▶', 'Corveta': '◁', 'Bombardeiro': '▽',
-  };
+  // Fechar dropdown ao trocar de planeta
   const shipsList = document.getElementById('op-ships-list');
-  // Fechar ao trocar de planeta
-  shipsList.classList.remove('open');
-  document.getElementById('fleet-toggle-btn').classList.remove('expanded');
-
-  if (planet.fleet && planet.fleet.length > 0) {
-    shipsList.innerHTML = planet.fleet.map(s => {
-      const icon = SHIP_ICONS[s.name] || '◈';
-      return `<div class="op-ship-row">
-        <span class="op-ship-icon">${icon}</span>
-        <span class="op-ship-name">${s.name}</span>
-        <span class="op-ship-count">${s.count}x</span>
-      </div>`;
-    }).join('');
-  } else {
-    shipsList.innerHTML = '<div style="font-size:11px;color:#2a3a50;padding:6px 2px">Sem naves registradas.</div>';
-  }
+  if (shipsList) shipsList.classList.remove('open');
+  const ftBtn = document.getElementById('fleet-toggle-btn');
+  if (ftBtn) ftBtn.classList.remove('expanded');
+  renderFleetList(planet);
 
   // Construções e créditos
   initPlanetBuildings(planet);
@@ -4661,6 +4908,13 @@ document.getElementById('btn-orbit').addEventListener('click', () => {
 document.getElementById('orbit-back').addEventListener('click', () => {
   closeOrbitScreen();
 });
+document.getElementById('ship-build-close').addEventListener('click', () => {
+  document.getElementById('ship-build-overlay').classList.remove('active');
+});
+document.getElementById('ship-build-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('ship-build-overlay'))
+    document.getElementById('ship-build-overlay').classList.remove('active');
+});
 
 // Edit player drawer
 document.getElementById('epd-close').addEventListener('click', closeEditPlayer);
@@ -4780,7 +5034,7 @@ const MASTER_EMAIL = 'mestre@omniscriptum.rpg'; // troque para seu e-mail de adm
 // Créditos por tick (1 mês) por nível de construção
 const CREDITS_PER_TICK = {
   refinery:  [0, 2400, 5200, 9000, 14000, 20000],
-  spaceport: [0, 3600, 7800, 13500, 21000, 30000],
+  spaceport: [0, 0, 0, 0, 0, 0], // Espaçoporto não gera renda — gera déficit
   generator: [0, 1800, 3900, 6750, 10500, 15000],
   barracks:  [0, 1200, 2600, 4500,  7000, 10000],
   farm:      [0, 1050, 2275, 3937,  6125,  8750],
