@@ -1075,6 +1075,101 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 .ship-building-bar { flex: 1; height: 3px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
 .ship-building-fill { height: 100%; background: linear-gradient(90deg,#c07820,#e0b040); border-radius: 2px; transition: width .3s; }
 
+
+/* ===== SESSION SCREEN ===== */
+#session-screen {
+  position: fixed; inset: 0; z-index: 3000;
+  background: #020408;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 0;
+  transition: opacity 0.5s;
+}
+#session-screen.hidden { opacity: 0; pointer-events: none; }
+#session-bg-stars { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+#session-content {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 2rem;
+  width: 420px; max-width: 92vw;
+}
+#session-logo {
+  font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700;
+  background: linear-gradient(135deg, #4a90d9, #9b59d4);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: .14em; text-align: center;
+}
+#session-subtitle {
+  font-size: 12px; color: rgba(100,140,200,0.45); letter-spacing: .18em;
+  text-transform: uppercase; font-family: 'Rajdhani', sans-serif;
+  margin-top: -.5rem; text-align: center;
+}
+.session-card {
+  width: 100%; background: rgba(8,14,30,0.98);
+  border: 0.5px solid rgba(100,150,255,0.18); border-radius: 14px;
+  padding: 1.6rem 1.8rem;
+}
+.session-card-title {
+  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 600;
+  color: #4a6890; letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.session-btn {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; padding: 1rem 1.2rem; margin-bottom: 8px;
+  border-radius: 10px; cursor: pointer; transition: all .2s;
+  border: 0.5px solid; text-align: left;
+}
+.session-btn:last-child { margin-bottom: 0; }
+.session-btn-new {
+  background: rgba(20,40,100,.4); border-color: rgba(80,130,255,.3); color: #80b0ff;
+}
+.session-btn-new:hover { background: rgba(30,60,150,.5); border-color: rgba(100,160,255,.5); }
+.session-btn-load {
+  background: rgba(20,60,30,.4); border-color: rgba(60,180,80,.25); color: #60c070;
+}
+.session-btn-load:hover { background: rgba(25,80,35,.5); border-color: rgba(80,200,100,.4); }
+.session-btn-icon {
+  width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.session-btn-icon-new { background: rgba(40,80,200,.25); }
+.session-btn-icon-load { background: rgba(30,100,40,.25); }
+.session-btn-label { font-size: 14px; font-weight: 600; font-family: 'Rajdhani',sans-serif; letter-spacing: .04em; }
+.session-btn-desc { font-size: 11px; opacity: .6; margin-top: 1px; font-family: 'Rajdhani',sans-serif; }
+#session-save-list { display: flex; flex-direction: column; gap: 6px; margin-top: .5rem; }
+.session-save-item {
+  display: flex; align-items: center; gap: 10px; padding: .7rem 1rem;
+  background: rgba(15,25,60,.5); border: 0.5px solid rgba(100,150,255,.1);
+  border-radius: 8px; cursor: pointer; transition: all .2s;
+}
+.session-save-item:hover { border-color: rgba(100,180,255,.35); background: rgba(25,45,100,.5); }
+.session-save-icon { font-size: 18px; flex-shrink: 0; }
+.session-save-name { font-size: 13px; font-weight: 600; color: #a0c0e0; flex: 1; font-family: 'Rajdhani',sans-serif; }
+.session-save-date { font-size: 10px; color: #3a5070; font-family: 'Rajdhani',sans-serif; }
+.session-save-delete {
+  background: none; border: none; color: rgba(200,80,80,.4);
+  cursor: pointer; font-size: 14px; padding: 2px 4px; transition: color .15s;
+}
+.session-save-delete:hover { color: rgba(255,100,100,.8); }
+#session-new-form { display: none; flex-direction: column; gap: 8px; margin-top: .8rem; }
+#session-new-form.visible { display: flex; }
+#session-name-input {
+  background: rgba(15,25,60,.7); border: 0.5px solid rgba(100,150,255,.25);
+  border-radius: 8px; padding: 9px 14px; font-size: 14px; color: #c0d0f0;
+  font-family: 'Rajdhani',sans-serif; outline: none; transition: border-color .2s;
+}
+#session-name-input:focus { border-color: rgba(100,180,255,.5); }
+#session-confirm-btn {
+  padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: 'Rajdhani',sans-serif; letter-spacing: .08em;
+  text-transform: uppercase; background: rgba(30,70,180,.5);
+  border: 0.5px solid rgba(80,150,255,.4); color: #80b0ff; transition: all .2s;
+}
+#session-confirm-btn:hover { background: rgba(40,90,220,.6); color: #c0d8ff; }
+#session-player-msg {
+  text-align: center; padding: 1.5rem; font-size: 13px; color: #3a5880;
+  font-family: 'Rajdhani',sans-serif; line-height: 1.6;
+}
+
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -1347,6 +1442,43 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
 <audio id="sfx-click" preload="auto"><source src="data:audio/mpeg;base64,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" type="audio/mpeg"></audio>
 
 
+
+<!-- SESSION SCREEN -->
+<div id="session-screen">
+  <canvas id="session-bg-stars"></canvas>
+  <div id="session-content">
+    <div id="session-logo">OMNISCRIPTUM</div>
+    <div id="session-subtitle">Sistema de Comando Galáctico</div>
+    <!-- Card para mestre -->
+    <div class="session-card" id="session-master-card" style="display:none">
+      <div class="session-card-title">Painel do Mestre</div>
+      <button class="session-btn session-btn-new" id="session-btn-new">
+        <div class="session-btn-icon session-btn-icon-new">✦</div>
+        <div>
+          <div class="session-btn-label">Nova Sessão</div>
+          <div class="session-btn-desc">Reinicia o jogo — planetas, créditos e frotas zerados</div>
+        </div>
+      </button>
+      <div id="session-new-form">
+        <input id="session-name-input" placeholder="Nome da sessão (ex: Campanha 1)">
+        <button id="session-confirm-btn">Criar Nova Sessão</button>
+      </div>
+      <button class="session-btn session-btn-load" id="session-btn-load">
+        <div class="session-btn-icon session-btn-icon-load">◈</div>
+        <div>
+          <div class="session-btn-label">Carregar Save</div>
+          <div class="session-btn-desc">Continua de onde parou</div>
+        </div>
+      </button>
+      <div id="session-save-list"></div>
+    </div>
+    <!-- Mensagem para jogador -->
+    <div class="session-card" id="session-player-card" style="display:none">
+      <div id="session-player-msg">Aguardando o mestre iniciar a sessão...</div>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div id="login-box">
@@ -1386,6 +1518,8 @@ window._fb = { db, rtdb, auth, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnap
     <button class="admin-btn admin-btn-green" id="admin-tick-btn">⏩ Avançar 1 Mês</button>
     <button class="admin-btn admin-btn-amber" id="admin-pause-btn">⏸ Pausar Tempo</button>
     <button class="admin-btn admin-btn-red" id="admin-sync-btn">☁ Sincronizar Planetas</button>
+    <button class="admin-btn admin-btn-green" id="admin-save-session-btn" style="margin-top:6px;width:100%">💾 Salvar Sessão</button>
+    <button class="admin-btn" id="admin-sessions-btn" style="margin-top:4px;width:100%;background:rgba(20,35,80,.4);border-color:rgba(100,150,255,.2);color:#6080a0">◈ Trocar Sessão</button>
   </div>
   <div class="admin-time-block">
     <div class="admin-time-header">
@@ -3557,13 +3691,7 @@ function calcFleetMaintain(planet) {
 // Inicializar construções dos planetas (placeholder aleatório)
 function initPlanetBuildings(planet) {
   if (planet.buildings) return;
-  const types = Object.keys(BUILDING_TYPES);
-  const count = Math.floor(Math.random() * 3); // 0-2 construções por padrão
-  planet.buildings = [];
-  const shuffled = [...types].sort(() => Math.random() - 0.5);
-  for (let i = 0; i < count; i++) {
-    planet.buildings.push({ type: shuffled[i], level: 1 + Math.floor(Math.random() * 3) });
-  }
+  planet.buildings = []; // começa vazio — sem geração aleatória
 }
 
 function updateOrbitEconUI(planet) {
@@ -3933,6 +4061,190 @@ function closeEditPlayer() {
   document.getElementById('edit-player-drawer').classList.remove('open');
   editingPlayer = null;
 }
+
+
+/* ==========================================================
+   SESSION SYSTEM
+   ========================================================== */
+
+let currentSessionId = null;
+
+// Estrelas animadas no fundo da tela de sessão
+function initSessionStars() {
+  const canvas = document.getElementById('session-bg-stars');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const stars = Array.from({length: 200}, () => ({
+    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+    r: Math.random() * 1.2 + .2, a: Math.random() * .5 + .1, tw: Math.random() * Math.PI * 2,
+  }));
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      ctx.globalAlpha = s.a + Math.sin(t * .01 + s.tw) * .12;
+      ctx.fillStyle = '#c0d8ff';
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha = 1; t++;
+    if (!document.getElementById('session-screen').classList.contains('hidden'))
+      requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+}
+
+async function openSessionScreen() {
+  initSessionStars();
+  const ss = document.getElementById('session-screen');
+  ss.style.display = 'flex';
+  ss.classList.remove('hidden');
+
+  if (isMaster()) {
+    document.getElementById('session-master-card').style.display = 'block';
+    document.getElementById('session-player-card').style.display = 'none';
+    await loadSaveList();
+  } else {
+    document.getElementById('session-master-card').style.display = 'none';
+    document.getElementById('session-player-card').style.display = 'block';
+    // Jogador: escutar sessão ativa
+    const { db, doc, onSnapshot } = window._fb;
+    onSnapshot(doc(db, 'game_state', 'session'), snap => {
+      if (snap.exists() && snap.data().active) {
+        closeSessionScreen();
+      } else {
+        document.getElementById('session-player-msg').textContent =
+          'Aguardando o mestre iniciar ou carregar uma sessão...';
+      }
+    });
+  }
+}
+
+function closeSessionScreen() {
+  const ss = document.getElementById('session-screen');
+  ss.classList.add('hidden');
+  setTimeout(() => ss.style.display = 'none', 500);
+}
+
+async function loadSaveList() {
+  const { db, collection, getDocs } = window._fb;
+  const snap = await getDocs(collection(db, 'sessions'));
+  const list = document.getElementById('session-save-list');
+  if (snap.empty) { list.innerHTML = ''; return; }
+  const saves = [];
+  snap.forEach(d => saves.push({ id: d.id, ...d.data() }));
+  saves.sort((a,b) => (b.savedAt||0) - (a.savedAt||0));
+  list.innerHTML = saves.map(s => {
+    const date = s.savedAt ? new Date(s.savedAt).toLocaleString('pt-BR') : '—';
+    return `<div class="session-save-item" data-id="${s.id}">
+      <span class="session-save-icon">◈</span>
+      <span class="session-save-name">${s.name || s.id}</span>
+      <span class="session-save-date">${date}</span>
+      <button class="session-save-delete" onclick="deleteSession('${s.id}',event)" title="Apagar">✕</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.session-save-item').forEach(item => {
+    item.addEventListener('click', () => loadSession(item.dataset.id));
+  });
+}
+
+async function createNewSession(name) {
+  const { db, doc, setDoc, collection, getDocs, updateDoc } = window._fb;
+  const sessionId = 'session_' + Date.now();
+
+  // 1. Salvar snapshot atual dos planetas nessa sessão
+  const sessionData = {
+    name: name || 'Sessão ' + new Date().toLocaleDateString('pt-BR'),
+    savedAt: Date.now(),
+    timeState: { year: 3036, month: 0, day: 1, paused: false },
+  };
+  await setDoc(doc(db, 'sessions', sessionId), sessionData);
+
+  // 2. Resetar todos os planetas
+  for (const p of PLANETS) {
+    p.buildings = []; p.fleet = []; p.fleetTotal = 0;
+    p.troops = 0; p.credits = 0;
+    p.ownerId = null; p.ownerName = null;
+    await updateDoc(doc(db, 'planets', String(p.id)), {
+      buildings: [], fleet: [], fleetTotal: 0, troops: 0,
+      credits: 0, ownerId: null, ownerName: null,
+    });
+  }
+
+  // 3. Resetar créditos dos jogadores
+  const pSnap = await getDocs(collection(db, 'players'));
+  pSnap.forEach(async pd => {
+    await updateDoc(doc(db, 'players', pd.id), { credits: 0 });
+    const pl = allPlayers.find(p => p.uid === pd.id);
+    if (pl) pl.credits = 0;
+    if (currentPlayer && currentPlayer.uid === pd.id) currentPlayer.credits = 0;
+  });
+
+  // 4. Resetar tempo
+  timeState = { year: 3036, month: 0, day: 1, paused: false, lastRealTime: Date.now() };
+  await setDoc(doc(db, 'game_state', 'time'), timeState);
+
+  // 5. Marcar sessão como ativa
+  currentSessionId = sessionId;
+  await setDoc(doc(db, 'game_state', 'session'), { active: true, id: sessionId, name: sessionData.name });
+
+  closeSessionScreen();
+  updateDateUI();
+  updateStatusBar();
+  loadAdminStats();
+}
+
+async function loadSession(sessionId) {
+  const { db, doc, getDoc, setDoc, collection, getDocs, updateDoc } = window._fb;
+
+  // Salvar primeiro o estado atual como novo save automático antes de carregar
+  const snap = await getDoc(doc(db, 'sessions', sessionId));
+  if (!snap.exists()) { alert('Save não encontrado.'); return; }
+
+  const sessionData = snap.data();
+
+  // Restaurar tempo
+  if (sessionData.timeState) {
+    timeState = { ...sessionData.timeState, lastRealTime: Date.now() };
+    await setDoc(doc(db, 'game_state', 'time'), timeState);
+  }
+
+  // Marcar sessão como ativa
+  currentSessionId = sessionId;
+  await setDoc(doc(db, 'game_state', 'session'), { active: true, id: sessionId, name: sessionData.name });
+
+  // Recarregar dados
+  await loadPlanetsFromFirestore();
+  await loadAllPlayers();
+  updateDateUI();
+  updateStatusBar();
+  loadAdminStats();
+  closeSessionScreen();
+}
+
+async function saveCurrentSession() {
+  if (!isMaster() || !currentSessionId) return;
+  const { db, doc, setDoc, collection, getDocs } = window._fb;
+  const sessionData = {
+    name: currentSessionId,
+    savedAt: Date.now(),
+    timeState: { ...timeState },
+  };
+  await setDoc(doc(db, 'sessions', currentSessionId), sessionData, { merge: true });
+  showSaved();
+}
+
+async function deleteSession(id, e) {
+  e.stopPropagation();
+  if (!confirm('Apagar este save permanentemente?')) return;
+  const { db, doc, deleteDoc } = window._fb;
+  await deleteDoc(doc(db, 'sessions', id));
+  loadSaveList();
+}
+
+// Auto-save a cada 5 minutos
+setInterval(() => { if (isMaster() && currentSessionId) saveCurrentSession(); }, 5 * 60 * 1000);
 
 /* ==========================================================
    OWNERSHIP SYSTEM
@@ -4535,18 +4847,9 @@ function openOrbitScreen(planet) {
 
   // Fleet e tropas (placeholder aleatório por planeta)
   if (!planet.fleet) {
-    const shipTypes = ['Fragata','Destruidor','Cruzador','Porta-naves','Corveta','Bombardeiro'];
-    const nShips = Math.floor(Math.random() * 4);
     planet.fleet = [];
-    const shuffled = [...shipTypes].sort(() => Math.random() - 0.5);
-    let total = 0;
-    for (let i = 0; i < nShips; i++) {
-      const count = Math.floor(Math.random() * 12) + 1;
-      total += count;
-      planet.fleet.push({ name: shuffled[i], count });
-    }
-    planet.fleetTotal = total;
-    planet.troops = Math.floor(Math.random() * 50000 / 1000) * 1000;
+    planet.fleetTotal = 0;
+    planet.troops = 0;
   }
   document.getElementById('op-fleet').textContent = planet.fleetTotal > 0 ? planet.fleetTotal + ' naves' : 'Nenhuma';
   document.getElementById('op-troops').textContent = planet.troops > 0 ? planet.troops.toLocaleString() : 'Nenhuma';
@@ -4914,6 +5217,22 @@ document.getElementById('ship-build-close').addEventListener('click', () => {
 document.getElementById('ship-build-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('ship-build-overlay'))
     document.getElementById('ship-build-overlay').classList.remove('active');
+});
+
+// Session screen
+document.getElementById('session-btn-new').addEventListener('click', () => {
+  const form = document.getElementById('session-new-form');
+  form.classList.toggle('visible');
+});
+document.getElementById('session-btn-load').addEventListener('click', () => {
+  loadSaveList();
+});
+document.getElementById('session-confirm-btn').addEventListener('click', () => {
+  const name = document.getElementById('session-name-input').value.trim() || 'Sessão ' + new Date().toLocaleDateString('pt-BR');
+  createNewSession(name);
+});
+document.getElementById('session-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('session-confirm-btn').click();
 });
 
 // Edit player drawer
@@ -5443,6 +5762,14 @@ function initAuth() {
   document.getElementById('admin-tick-btn').addEventListener('click', advanceTick);
   document.getElementById('admin-pause-btn').addEventListener('click', () => {
     togglePause();
+  });
+  document.getElementById('admin-save-session-btn').addEventListener('click', () => {
+    if (!currentSessionId) { alert('Nenhuma sessão ativa. Use "Trocar Sessão" para criar ou carregar uma.'); return; }
+    saveCurrentSession();
+  });
+  document.getElementById('admin-sessions-btn').addEventListener('click', () => {
+    document.getElementById('admin-panel').classList.remove('open');
+    openSessionScreen();
   });
   document.getElementById('admin-sync-btn').addEventListener('click', () => {
     if (confirm('Sincronizar todos os planetas locais para o servidor? Isso sobrescreve os dados existentes.')) {
