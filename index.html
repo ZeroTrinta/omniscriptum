@@ -816,7 +816,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-const FB_CONFIG = {
+const FB_CONFIG = window.FB_CONFIG = {
   apiKey: "AIzaSyBDUkOPiqLvDetex9xn6xTFY5R0fFzCKPk",
   authDomain: "omniscriptum-7b174.firebaseapp.com",
   projectId: "omniscriptum-7b174",
@@ -1097,7 +1097,22 @@ window._fb = { db, auth, doc, getDoc, setDoc, updateDoc, onSnapshot,
     <button class="admin-btn admin-btn-red" id="admin-sync-btn">☁ Sincronizar Planetas</button>
   </div>
   <div class="admin-sep"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+    <div style="font-size:9px;color:#344870;text-transform:uppercase;letter-spacing:.09em;font-family:'Rajdhani',sans-serif">Jogadores</div>
+    <button class="admin-assign-btn" id="admin-add-player-btn" style="font-size:10px;padding:3px 10px">+ Adicionar Jogador</button>
+  </div>
   <div id="admin-players-list"></div>
+  <div id="admin-add-player-form" style="display:none;margin-top:.8rem;background:rgba(15,25,65,.5);border:0.5px solid rgba(100,150,255,.12);border-radius:8px;padding:.8rem">
+    <div style="font-size:9px;color:#344870;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Novo Jogador</div>
+    <input class="login-input" id="new-player-name" placeholder="Nome do jogador" style="margin-bottom:6px;font-size:12px;padding:7px 12px">
+    <input class="login-input" id="new-player-email" placeholder="E-mail" style="margin-bottom:6px;font-size:12px;padding:7px 12px">
+    <input class="login-input" id="new-player-pass" placeholder="Senha" type="password" style="margin-bottom:8px;font-size:12px;padding:7px 12px">
+    <div style="display:flex;gap:6px">
+      <button class="admin-btn admin-btn-green" id="admin-create-player-btn" style="font-size:11px;padding:7px">Criar Jogador</button>
+      <button class="admin-btn admin-btn-red" id="admin-cancel-player-btn" style="font-size:11px;padding:7px;flex:0">Cancelar</button>
+    </div>
+    <div id="admin-player-error" style="font-size:11px;color:#e06060;margin-top:.4rem"></div>
+  </div>
 </div>
 
 
@@ -3190,6 +3205,7 @@ async function loadAllPlayers() {
   let colorIdx = 0;
   snap.forEach(d => {
     const pl = d.data();
+    if (pl.email === MASTER_EMAIL) return; // pular mestre
     if (!playerColorMap[pl.uid]) {
       playerColorMap[pl.uid] = pl.color || PLAYER_COLORS[colorIdx % PLAYER_COLORS.length];
       colorIdx++;
@@ -3197,6 +3213,47 @@ async function loadAllPlayers() {
     allPlayers.push({ ...pl, color: playerColorMap[pl.uid] });
   });
   updateOwnerLegend();
+}
+
+/* ── Criar jogador: Auth via REST + documento no Firestore ── */
+async function createPlayer(name, email, password) {
+  const API_KEY = FB_CONFIG.apiKey;
+  const errEl = document.getElementById('admin-player-error');
+  errEl.textContent = '';
+
+  // 1. Criar usuário no Firebase Auth via REST
+  let uid;
+  try {
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
+      { method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password, returnSecureToken: true }) }
+    );
+    const data = await res.json();
+    if (data.error) { errEl.textContent = data.error.message; return; }
+    uid = data.localId;
+  } catch(e) {
+    errEl.textContent = 'Erro ao criar usuário: ' + e.message;
+    return;
+  }
+
+  // 2. Gravar documento do jogador no Firestore
+  const color = PLAYER_COLORS[allPlayers.length % PLAYER_COLORS.length];
+  const playerDoc = { uid, email, name, role: 'player', color, credits: 0 };
+  const { db, doc, setDoc } = window._fb;
+  await setDoc(doc(db, 'players', uid), playerDoc);
+
+  playerColorMap[uid] = color;
+  allPlayers.push(playerDoc);
+
+  // 3. Fechar form e atualizar UI
+  document.getElementById('admin-add-player-form').style.display = 'none';
+  document.getElementById('new-player-name').value = '';
+  document.getElementById('new-player-email').value = '';
+  document.getElementById('new-player-pass').value = '';
+  loadAdminStats();
+  updateOwnerLegend();
+  showSaved();
 }
 
 /* ── Atualizar legenda de donos no mapa ── */
@@ -3931,6 +3988,28 @@ document.getElementById('orbit-back').addEventListener('click', () => {
   closeOrbitScreen();
 });
 
+// Admin — adicionar jogador
+document.getElementById('admin-add-player-btn').addEventListener('click', () => {
+  const form = document.getElementById('admin-add-player-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('admin-cancel-player-btn').addEventListener('click', () => {
+  document.getElementById('admin-add-player-form').style.display = 'none';
+  document.getElementById('admin-player-error').textContent = '';
+});
+document.getElementById('admin-create-player-btn').addEventListener('click', async () => {
+  const name  = document.getElementById('new-player-name').value.trim();
+  const email = document.getElementById('new-player-email').value.trim();
+  const pass  = document.getElementById('new-player-pass').value;
+  if (!name || !email || !pass) {
+    document.getElementById('admin-player-error').textContent = 'Preencha todos os campos.';
+    return;
+  }
+  document.getElementById('admin-create-player-btn').textContent = 'Criando...';
+  await createPlayer(name, email, pass);
+  document.getElementById('admin-create-player-btn').textContent = 'Criar Jogador';
+});
+
 // Assign popup listeners
 document.getElementById('btn-assign-planet').addEventListener('click', () => {
   if (selectedPlanet) openAssignPopup(selectedPlanet);
@@ -4269,8 +4348,17 @@ async function loadAdminStats() {
   const { db, collection, getDocs } = window._fb;
   const snap = await getDocs(collection(db, 'players'));
   let total = 0; const rows = [];
+  // Remontar allPlayers para manter sincronizado
+  allPlayers = [];
+  let colorIdx = 0;
   snap.forEach(d => {
     const pl = d.data();
+    if (pl.email === MASTER_EMAIL) return;
+    if (!playerColorMap[pl.uid]) {
+      playerColorMap[pl.uid] = pl.color || PLAYER_COLORS[colorIdx % PLAYER_COLORS.length];
+      colorIdx++;
+    }
+    allPlayers.push({ ...pl, color: playerColorMap[pl.uid] });
     const planetCount = PLANETS.filter(p => p.ownerId === pl.uid).length;
     total += pl.credits || 0;
     rows.push({ name: pl.name || pl.email, credits: pl.credits || 0, planets: planetCount, color: playerColorMap[pl.uid] || '#888' });
